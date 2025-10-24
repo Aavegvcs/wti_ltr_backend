@@ -4,36 +4,45 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 import { standardResponse } from 'src/utils/helper/response.helper';
+import { FirstTripSheet } from './entities/first-trip-sheet.entity';
+import { Driver } from '@modules/driver/entities/driver.entity';
 
 @Injectable()
 export class TripSheetService {
     constructor(
-        // @InjectRepository(InsurancePolicy)
-        // private readonly _policyRepo: Repository<InsurancePolicy>,
+        @InjectRepository(FirstTripSheet)
+        private readonly _firstTripSheetRepo: Repository<FirstTripSheet>,
 
+        @InjectRepository(Driver)
+        private readonly _driverRepo: Repository<Driver>,
+
+        private readonly loggedInsUserService: LoggedInsUserService
       
     ) {}
 
-    // async createClaim(reqBody: any): Promise<any> {
+    // async getTripSheetByMobile(reqBody: any): Promise<any> {
     //     try {
-    //         const { policyId, incidentDate, incidentPlace, incidentDescription, claimType, claimAmount } = reqBody;
+    //         const { mobileNumber, tripDate } = reqBody;
     //         const userEntity = await this.loggedInsUserService.getCurrentUser();
 
     //         if (!userEntity) {
-    //             return standardResponse(false, 'Logged user not found', 404, null, null, 'insurance-claim/createClaim');
+    //             return standardResponse(false, 'Logged user not found', 404, null, null, 'tripsheet/getTripSheetByMobile');
     //         }
-    //         const policy = await this._policyRepo.findOne({
-    //             where: { id: policyId },
-    //             relations: ['insuranceProduct', 'insuranceUser']
+
+    //         const driver = await this._driverRepo.findOne({
+    //             where: { mobileNumber: mobileNumber }
     //         });
-    //         if (!policy) {
-    //             return standardResponse(false, 'Policy not found', 404, null, null, 'insurance-claim/createClaim');
+
+    //         if (!driver) {
+    //             return standardResponse(false, 'Driver not found', 404, null, null, 'tripsheet/getTripSheetByMobile');
     //         }
+
     //         // existing claim code
     //         const existingClaim = await this._claimRepo.findOne({
     //             where: { policy: { id: policy.id } },
     //             order: { createdAt: 'DESC' }
     //         });
+
     //         if (existingClaim) {
     //             if (existingClaim.status !== Claim_Status.CLOSED && existingClaim.status !== Claim_Status.REJECTED) {
     //                 return standardResponse(
@@ -135,6 +144,6 @@ export class TripSheetService {
     //         return standardResponse(false, error.message, 501, null, null, 'insurance-claim/createClaim');
     //     }
     // }
-    // this is function
+   
   
 }

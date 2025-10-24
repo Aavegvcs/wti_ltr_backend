@@ -3,8 +3,8 @@ import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 
-@ApiTags('first-trip-sheet')
-@Controller('first-tripsheet')
+@ApiTags('trip-sheet')
+@Controller('tripsheet')
 export class TripSheetController {
     constructor() {}
 

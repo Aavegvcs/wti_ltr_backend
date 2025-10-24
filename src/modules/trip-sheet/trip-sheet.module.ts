@@ -8,13 +8,15 @@ import { TripSheetController } from './trip-sheet.controller';
 import { TripSheetService } from './trip-sheet.service';
 import { FirstTripSheet } from './entities/first-trip-sheet.entity';
 import { TripSheetStatus } from './entities/trip-sheet-status.entity';
+import { Driver } from '@modules/driver/entities/driver.entity';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             User,
             TripSheetStatus,
-            FirstTripSheet
+            FirstTripSheet,
+            Driver
         ]),
          forwardRef(() => UserModule),
          forwardRef(() => AuthModule)
