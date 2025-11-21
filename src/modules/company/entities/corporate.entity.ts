@@ -63,7 +63,7 @@ export class Corporate extends BaseEntity {
 
     @ApiProperty({
         description: 'Currency',
-        example: ' $ , PKR'
+        example: ' $ , INR'
     })
     @Column({ nullable: true })
     currency: string;

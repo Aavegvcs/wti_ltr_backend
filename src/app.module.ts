@@ -66,7 +66,7 @@ import { TripSheetModule } from '@modules/trip-sheet/trip-sheet.module';
         //     }
         // }),
         InsuranceDashboardModule,
-        RedisModule
+         RedisModule
     ],
     controllers: [AppController],
     providers: [

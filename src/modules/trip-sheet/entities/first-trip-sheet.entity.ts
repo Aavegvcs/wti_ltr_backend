@@ -13,6 +13,7 @@ import { Corporate } from '@modules/company/entities/corporate.entity';
 import { Vehicle } from '@modules/vehicle/entities/vehicle.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
 import { TripSheetStatus } from './trip-sheet-status.entity';
+import { Branch } from '@modules/branch/entities/branch.entity';
 
 @Entity({ name: 'first_trip_sheet' })
 export class FirstTripSheet {
@@ -23,6 +24,10 @@ export class FirstTripSheet {
     @JoinColumn({ name: 'corporate_id' })
     corporate: Corporate;
 
+    @ManyToOne(() => Branch)
+    @JoinColumn({ name: "branch_id" })
+    branch: Branch;
+
     @ManyToOne(() => Vehicle)
     @JoinColumn({ name: 'vehicle_id' })
     vehicle: Vehicle;
@@ -32,7 +37,7 @@ export class FirstTripSheet {
     driver: Driver;
 
     @ManyToOne(() => TripSheetStatus)
-    @JoinColumn({ name: 'status' })
+    @JoinColumn({ name: 'id' })
     status: TripSheetStatus;
 
     @Column({ type: 'date', name: 'trip_date', nullable: false })

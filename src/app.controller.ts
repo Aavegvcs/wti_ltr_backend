@@ -17,6 +17,7 @@ export class AppController {
     @Post('encrypt')
     encrypt(@Request() req): Promise<any> {
         let data = req.body.string;
+        // console.log("is my api getting hit");
         return encryptData(data);
     }
 

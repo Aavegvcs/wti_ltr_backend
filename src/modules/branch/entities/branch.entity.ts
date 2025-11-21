@@ -17,38 +17,34 @@ import { State } from '@modules/states/entities/state.entity';
 import { branchModelsArr } from 'src/utils/app.utils';
 import { User } from '@modules/user/user.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
-@Entity()
+@Entity({ name: 'branch' })
 export class Branch extends BaseEntity {
-    @PrimaryColumn({ unique: true, type: 'varchar', length: 50, nullable: false })
+    @PrimaryColumn({ unique: true, type: 'varchar', length: 50 })
     id: string;
 
-    
-    @Column({
-        name: 'branch_code',
-        unique: true,
-        nullable:false
-    })
+    @Column({ name: 'branch_code', unique: true })
     branchCode: string;
 
-    @ManyToOne(() => Corporate, (corporate) => corporate.branch, { nullable: true })
+    @ManyToOne(() => Corporate, corporate => corporate.branch, { nullable: false })
     @JoinColumn({ name: 'corporate_id' })
     corporate: Corporate;
 
-    @Column({ nullable: false })
+    @Column()
     name: string;
 
     @ManyToOne(() => State, { nullable: true })
     @JoinColumn({ name: 'state_id' })
     state: State;
 
-    // @Column({ nullable: false })
-    // city: string;
+    @Column({ nullable: true })
+    city: string;   // <- ADD BACK if needed
 
     @Column({ nullable: true })
     pincode: number;
 
-    @Column({name:'is_active', default: true })
+    @Column({ name: 'is_active', default: true })
     isActive: boolean;
 
     @Column()
@@ -60,10 +56,10 @@ export class Branch extends BaseEntity {
     @Column({ nullable: true })
     email: string;
 
-    @ManyToOne(() => User, (user) => user.managedBranches, { nullable: true })
+    @ManyToOne(() => User, user => user.managedBranches, { nullable: true })
     regionalManager: User;
 
-    @ManyToOne(() => User, (user) => user.rmBranches, { nullable: true })
+    @ManyToOne(() => User, user => user.rmBranches, { nullable: true })
     @JoinColumn({ name: 'rmId' })
     rm: User;
 
@@ -76,44 +72,31 @@ export class Branch extends BaseEntity {
     @Column({ type: 'date', nullable: true })
     activationDate: Date;
 
-
     @Column({ name: 'contact_person', nullable: true })
     contactPerson: string;
 
-    @CreateDateColumn({
-        type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP(6)'
-    })
+    @CreateDateColumn()
     createdAt: Date;
 
-    @UpdateDateColumn({
-        type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP(6)',
-        onUpdate: 'CURRENT_TIMESTAMP(6)'
-    })
+    @UpdateDateColumn()
     updatedAt: Date;
 
-    @DeleteDateColumn({ type: 'timestamp', nullable: true })
+    @DeleteDateColumn()
     deletedAt: Date;
 
-
-    // Self-referencing Many-to-One (Each branch can have one control branch)
-    @ManyToOne(() => Branch, (branch) => branch.subBranches, { nullable: true })
+    // Control branch (parent)
+    @ManyToOne(() => Branch, branch => branch.subBranches, { nullable: true })
     @JoinColumn({ name: 'control_branch_id' })
     controlBranch: Branch;
 
-    // Self-referencing One-to-Many (Each branch can be a control branch for many)
-    @OneToMany(() => Branch, (branch) => branch.controlBranch)
+    // Sub-branches (children)
+    @OneToMany(() => Branch, branch => branch.controlBranch)
     subBranches: Branch[];
 
     @OneToMany(() => User, (user) => user.branch)
     employees: User[];
 
-    // @OneToMany(() => InsuranceTicket, (data) => data.branch)
-    // tickets: InsuranceTicket[];
-
-    @OneToMany(() => User, (user) => user.branch)
-    user: User[];
-
-
+    // CVD Mapping (Corporate–Branch–Vehicle–Driver)
+    @OneToMany(() => CvdMapping, cvd => cvd.branch)
+    cvdMapping: CvdMapping[];
 }

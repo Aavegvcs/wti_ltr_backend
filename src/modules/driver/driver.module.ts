@@ -6,10 +6,12 @@ import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 import { User } from '@modules/user/user.entity';
 import { DriverController } from './driver.controller';
 import { DriverService } from './driver.service';
+import { Driver } from './entities/driver.entity';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
+            Driver,
             User
         ]),
          forwardRef(() => UserModule),
