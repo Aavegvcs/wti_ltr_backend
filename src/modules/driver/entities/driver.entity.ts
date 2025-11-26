@@ -53,6 +53,6 @@ export class Driver {
     @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
     deletedAt: Date;
 
-  @OneToMany(() => CvdMapping, (data) => data.driver, { cascade: true, onDelete: 'CASCADE' })
+    @OneToMany(() => CvdMapping, (data) => data.driver, { cascade: true, onDelete: 'CASCADE' })
      cvdMapping: CvdMapping[];
 }

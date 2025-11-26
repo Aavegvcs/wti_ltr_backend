@@ -71,7 +71,7 @@ export class JwtAuthGuard implements CanActivate, OnModuleInit {
                     email: email,
                     corporate: { id: 1 }
                 },
-                relations: ['corporate', 'userType', 'branch', 'department']
+                relations: ['corporate', 'userRole', 'branch']
             });
 
             // console.log('here is db user is-----', dbUser);

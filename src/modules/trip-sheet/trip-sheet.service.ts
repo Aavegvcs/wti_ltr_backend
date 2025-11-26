@@ -143,7 +143,5 @@ export class TripSheetService {
     //         console.log('-api- createPlicy', error.message);
     //         return standardResponse(false, error.message, 501, null, null, 'insurance-claim/createClaim');
     //     }
-    // }
-   
-  
+    // }  
 }
