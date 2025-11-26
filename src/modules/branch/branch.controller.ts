@@ -31,7 +31,7 @@ export class BranchController {
     //     return this.branchService.create(createBranchDto);
     // }
 
-    // @UseGuards(JwtAuthGuard)
+    @UseGuards(JwtAuthGuard)
     @ApiOperation({ summary: 'Get all branches' })
     @Post('list')
     async findAll(@Req() req: any) {

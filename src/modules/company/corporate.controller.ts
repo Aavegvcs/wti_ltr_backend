@@ -9,7 +9,7 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 export class CorporateController {
     constructor(
         private readonly corporateService: CorporateService,
-    ) {}
+    ) { }
 
     // @UseGuards(JwtAuthGuard)
     // @Post('create')
@@ -51,4 +51,10 @@ export class CorporateController {
     async findOneById(@Param() params: any) {
         await this.corporateService.findCorporateById(params.id);
     }
+    @UseGuards(JwtAuthGuard)
+    @Get()
+    async getAllCompanies() {
+        return await this.corporateService.getAllCompanies();
+    }
+
 }

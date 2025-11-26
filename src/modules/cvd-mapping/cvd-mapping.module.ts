@@ -10,12 +10,14 @@ import { Corporate } from '@modules/company/entities/corporate.entity';
 import { Vehicle } from '@modules/vehicle/entities/vehicle.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
 import { CvdMapping } from './enitites/cvd-mapping.entity';
+import { Branch } from '@modules/branch/entities/branch.entity';
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             CvdMapping,
             User,
             Corporate,
+            Branch,
             Vehicle,
             Driver
         ]),

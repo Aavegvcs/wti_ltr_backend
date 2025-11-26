@@ -10,7 +10,7 @@ import { Corporate } from './entities/corporate.entity';
 import { LogService } from '../log/log.service';
 import { MediaService } from '../media/media.service';
 import { User } from '../user/user.entity';
-import {orderByKey, orderByValue } from 'src/utils/app.utils';
+import { orderByKey, orderByValue } from 'src/utils/app.utils';
 // import { Action } from '../ability/ability.factory';
 import { UserService } from '../user/user.service';
 
@@ -27,7 +27,7 @@ export class CorporateService {
         private userRepo: Repository<User>,
         @Inject(forwardRef(() => UserService))
         private userService: UserService
-    ) {}
+    ) { }
 
 
 
@@ -35,7 +35,7 @@ export class CorporateService {
         const companies = await this.corporateRepo
             .createQueryBuilder('company')
             .leftJoinAndSelect('company.state', 'state')
-            .leftJoinAndSelect('company.city', 'city')
+            // .leftJoinAndSelect('company.city', 'city')
             .leftJoinAndSelect('company.country', 'country')
             .where(req?.QUERY_STRING?.where)
             .skip(req?.QUERY_STRING?.skip)
@@ -56,17 +56,18 @@ export class CorporateService {
         for (const company of companies) {
             let clients = await this.userRepo
                 .createQueryBuilder('user')
-                .where('user.company = :company AND user.userType = :userType', {
-                    company: company.id,
-                    userType: 'client'
+                .where('user.corporate_id = :corporateId AND user.userRole = :userRole', {
+                    corporateId: company.id,
+                    userRole: 'client'  // or whatever role identifies client
                 })
+
                 .getMany();
 
             let staff = await this.userRepo
                 .createQueryBuilder('user')
-                .where('user.company = :company AND user.userType = :userType', {
-                    company: company.id,
-                    userType: 'staff'
+                .where('user.corporate_id = :corporateId AND user.userRole = :userRole', {
+                    corporateId: company.id,
+                    userRole: 'staff'
                 })
                 .getMany();
 
@@ -76,7 +77,7 @@ export class CorporateService {
                     count: clients?.length,
                     records: [...clients]
                 },
-               
+
                 staff: {
                     count: staff?.length,
                     records: [...staff]
@@ -92,7 +93,7 @@ export class CorporateService {
         return await this.corporateRepo
             .createQueryBuilder('company')
             .leftJoinAndSelect('company.state', 'state')
-            .leftJoinAndSelect('company.city', 'city')
+            // .leftJoinAndSelect('company.city', 'city')
             .leftJoinAndSelect('company.country', 'country')
             .where('company.id = :id', { id })
             .getOne();
@@ -102,6 +103,9 @@ export class CorporateService {
         return await this.corporateRepo.findOneBy({ id });
     }
 
+     async getAllCompanies() {
+        return await this.corporateRepo.find();
+    }
     // async updateCompany(updateCompanyDto: CompanyUpdateDto, req: any) {
     //     const loggedInUser = req?.user?.email ? await this.userRepo.findOneBy({ email: req?.user?.email }) : null;
 

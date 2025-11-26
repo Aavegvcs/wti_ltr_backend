@@ -112,7 +112,7 @@ export class CompanyCreateDto {
 
     @ApiProperty({
         description: 'Currency',
-        example: ' $ , PKR'
+        example: ' $ , INR'
     })
     @Column({ nullable: true })
     currency: string;
