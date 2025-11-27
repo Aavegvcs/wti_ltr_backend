@@ -8,6 +8,11 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 export class TripSheetController {
     constructor(private readonly tripSheetService: TripSheetService) {}
 
+    @Post('newTripsheetApi')
+    @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })
+    async newTripsheetApi(@Body() body: any) {
+        return this.tripSheetService.newTripsheetApi(body);
+    }
     @Post('get-or-create')
     @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })
     async getOrCreateTripSheet(@Body() body: any) {

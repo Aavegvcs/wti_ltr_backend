@@ -6,17 +6,19 @@ import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 import { User } from '@modules/user/user.entity';
 import { TripSheetController } from './trip-sheet.controller';
 import { TripSheetService } from './trip-sheet.service';
-import { FirstTripSheet } from './entities/first-trip-sheet.entity';
+import { TripSheet } from './entities/trip-sheet.entity';
 import { TripSheetStatus } from './entities/trip-sheet-status.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             User,
             TripSheetStatus,
-            FirstTripSheet,
-            Driver
+            TripSheet,
+            Driver,
+            CvdMapping
         ]),
          forwardRef(() => UserModule),
          forwardRef(() => AuthModule)

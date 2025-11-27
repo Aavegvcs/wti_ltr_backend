@@ -195,7 +195,7 @@ export class CvdMappingService {
 
             // VEHICLE MUST BE FREE
             const activeVehicle = await this.cvdRepo.findOne({
-                where: { vehicleId, isActive: true }
+                where: { corporate, isActive: true }
             });
             if (activeVehicle) {
                 return standardResponse(false, "Vehicle already linked to a driver/branch", 400);
@@ -203,7 +203,7 @@ export class CvdMappingService {
 
             // DRIVER MUST BE FREE
             const activeDriver = await this.cvdRepo.findOne({
-                where: { driverId, isActive: true }
+                where: { driver, isActive: true }
             });
             if (activeDriver) {
                 return standardResponse(false, "Driver already linked to a vehicle/branch", 400);
@@ -223,10 +223,6 @@ export class CvdMappingService {
             //     updatedBy: user
             // });
             const newMapping = this.cvdRepo.create({
-                corporateId,
-                branchId,   // only this
-                vehicleId,
-                driverId,
                 corporate,
                 branch,
                 vehicle,

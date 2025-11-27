@@ -22,6 +22,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DriverService } from './driver.service';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 
+
 @ApiTags('driver')
 @Controller('driver')
 export class DriverController {

@@ -7,7 +7,8 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
-    OneToMany
+    OneToMany,
+    Index
 } from 'typeorm';
 import { User } from '@modules/user/user.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
@@ -20,6 +21,7 @@ export class Driver {
     @Column({ name: 'name', nullable: false })
     name: string;
 
+    @Index('idx_driver_mobile_number')
     @Column({ name: 'mobile_number', nullable: false })
     mobileNumber: string;
 
@@ -53,6 +55,6 @@ export class Driver {
     @DeleteDateColumn({ name: 'deleted_at', type: 'timestamp', nullable: true })
     deletedAt: Date;
 
-  @OneToMany(() => CvdMapping, (data) => data.driver, { cascade: true, onDelete: 'CASCADE' })
+    @OneToMany(() => CvdMapping, (data) => data.driver, { cascade: true, onDelete: 'CASCADE' })
      cvdMapping: CvdMapping[];
 }

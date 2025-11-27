@@ -9,7 +9,7 @@ import { DriverService } from './driver.service';
 import { Driver } from './entities/driver.entity';
 
 @Module({
-    imports: [
+     imports: [
         TypeOrmModule.forFeature([
             Driver,
             User
