@@ -1,30 +1,186 @@
-import {
-    forwardRef,
-    Inject,
-    Injectable,
-    Logger,
-} from '@nestjs/common';
+// import {
+//     forwardRef,
+//     Inject,
+//     Injectable,
+//     Logger,
+// } from '@nestjs/common';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { DataSource, EntityManager, Repository } from 'typeorm';
+// import { Branch } from './entities/branch.entity';
+// import { CreateBranchDto } from './dto/create-branch.dto';
+// import { UpdateBranchDto } from './dto/update-branch.dto';
+// import { BranchModels, Designation } from 'src/utils/app.utils';
+// import { orderByKey, orderByValue } from 'src/utils/app.utils';
+// import 'moment-timezone';
+// import { User } from '@modules/user/user.entity';
+// import { UserService } from '@modules/user/user.service';
+
+// interface CreateBranchDtoWithRowNumber extends CreateBranchDto {
+//     originalRowNumber: number;
+// }
+
+// export interface IChurn {
+//     particulars: string;
+//     activeClientsAvg: number;
+//     target: number;
+//     achieved: number;
+// }
+
+// @Injectable()
+// export class BranchService {
+//     private readonly logger = new Logger(BranchService.name);
+
+//     constructor(
+//         @InjectRepository(Branch)
+//         private readonly branchRepository: Repository<Branch>,
+//         @InjectRepository(User)
+//         private readonly employeeRepository: Repository<User>,
+//         @Inject(forwardRef(() => UserService))
+//         private readonly userService: UserService,
+//         private readonly dataSource: DataSource,
+//     ) { }
+
+
+//     async findAll(req: any): Promise<any> {
+//         Logger.log('QUERY_String', req?.QUERY_STRING);
+//         // Single query for data and counts
+//         const branches = await this.branchRepository
+//             .createQueryBuilder('branch')
+//             .leftJoinAndSelect('branch.controlBranch', 'controlBranch')
+//             .leftJoinAndSelect('branch.regionalManager', 'regionalManager')
+//             .where('branch.deletedAt IS NULL')
+//             // .andWhere('branch.model = :model', { model: BranchModels.BRANCH })
+//             .andWhere(req?.QUERY_STRING?.where || '1=1')
+//             .orderBy(orderByKey({ key: req?.QUERY_STRING?.orderBy?.key, repoAlias: 'branch' }), orderByValue({ req }))
+//             .offset(req?.QUERY_STRING?.skip || 0)
+//             .limit(req?.QUERY_STRING?.limit || 10)
+//             .getMany();
+
+//         // Transform results
+//         const items = branches.map((branch: any) => ({
+//             id: branch.id,
+//             name: branch.name,
+//             city: branch.city,
+//             email: branch.email,
+//             phone: branch.phone,
+//             model: branch.model,
+//             controlBranch: branch.controlBranch ? { id: branch.controlBranch.id, name: branch.controlBranch.name } : null,
+//             regionalManager: branch.regionalManager ? { id: branch.regionalManager.id, name: branch.regionalManager.name } : null,
+//             active: branch.active,
+//             createdAt: branch.createdAt,
+//             updatedAt: branch.updatedAt,
+//             deletedAt: branch.deletedAt,
+//         }));
+
+//         // Create query builder for additional queries
+//         const qb = this.branchRepository
+//             .createQueryBuilder('branch')
+//             // .where('branch.model = :model', { model: BranchModels.BRANCH })
+//             .andWhere('branch.deletedAt IS NULL')
+//             .andWhere(req.where || '1=1'); // Safe default for where clause
+
+//         return { qb, items };
+//     }
+
+//     async findById(id: string, manager?: EntityManager): Promise<Branch> {
+//         const repo = manager ? manager.getRepository(Branch) : this.branchRepository;
+//         const branch = await repo.findOne({
+//             where: { id },
+//             relations: {
+//                 controlBranch: true,
+//                 regionalManager: true,
+//                 state: true,
+//             }
+//         });
+//         if (!branch) throw new Error(`Branch with ID ${id} not found`);
+//         return branch;
+//     }
+
+//     async update(id: string, updateBranchDto: UpdateBranchDto): Promise<Branch> {
+//         return this.branchRepository.manager.transaction(async (transactionalEntityManager) => {
+//             const branch = await this.findById(id, transactionalEntityManager);
+
+//             Object.assign(branch, {
+//                 ...updateBranchDto,
+//                 activationDate: updateBranchDto.activationDate,
+//                 state: updateBranchDto.stateId ? { id: updateBranchDto.stateId } : branch.state,
+//                 regionalManager: updateBranchDto.regionalManagerId
+//                     ? { id: updateBranchDto.regionalManagerId }
+//                     : branch.regionalManager,
+//                 controlBranch: updateBranchDto.controlBranchId
+//                     ? { id: updateBranchDto.controlBranchId }
+//                     : branch.controlBranch,
+//             });
+
+//             return await transactionalEntityManager.save(Branch, branch);
+//         });
+//     }
+
+//     async toggleStatus(id: string): Promise<Branch> {
+//         const branch = await this.branchRepository.findOne({ where: { id } });
+
+//         if (!branch) {
+//             throw new Error(`Branch with id ${id} not found`);
+//         }
+//         Logger.log('status', branch.isActive);
+//         branch.isActive = !branch.isActive;
+//         Logger.log('status 2', branch.isActive);
+
+//         return this.branchRepository.save(branch);
+//     }
+
+//     async remove(id: string): Promise<void> {
+//         await this.branchRepository.manager.transaction(async (transactionalEntityManager) => {
+//             const branch = await this.findById(id, transactionalEntityManager);
+
+//             // await transactionalEntityManager.softDelete(BranchRevenue, { branchId: id });
+//             await transactionalEntityManager.softDelete(Branch, id);
+//         });
+//     }
+
+
+//     async getAllBranches(): Promise<any> {
+//         try {
+//             return await this.branchRepository.find({
+//                 select: ['id'],
+//                 where: {
+//                     // model: In([BranchModels.BRANCH, BranchModels.FRANCHISE])
+//                 }
+//             })
+
+//         } catch (error) {
+//             this.logger.error(`Failed to fetch subbranch revenue: ${error.message}`);
+//             throw error;
+//         }
+//     }
+
+
+//      async getBranch(): Promise<any> {
+//         try {
+
+//             const query = 'CALL get_branch()'
+
+//             const result = await this.branchRepository.query(query);
+//             return {
+//                 status:'success',
+//                 message: 'success fully data fetch',
+//                 result:result[0]
+
+//             }
+
+//         } catch (error) {
+//             this.logger.error(`Failed to fetch subbranch revenue: ${error.message}`);
+//             throw error;
+//         }
+//     }
+// }
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { Repository, DataSource, EntityManager, In } from 'typeorm';
 import { Branch } from './entities/branch.entity';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
-import { BranchModels, Designation } from 'src/utils/app.utils';
-import { orderByKey, orderByValue } from 'src/utils/app.utils';
-import 'moment-timezone';
 import { User } from '@modules/user/user.entity';
-import { UserService } from '@modules/user/user.service';
-
-interface CreateBranchDtoWithRowNumber extends CreateBranchDto {
-    originalRowNumber: number;
-}
-
-export interface IChurn {
-    particulars: string;
-    activeClientsAvg: number;
-    target: number;
-    achieved: number;
-}
 
 @Injectable()
 export class BranchService {
@@ -33,542 +189,266 @@ export class BranchService {
     constructor(
         @InjectRepository(Branch)
         private readonly branchRepository: Repository<Branch>,
-        @InjectRepository(User)
-        private readonly employeeRepository: Repository<User>,
-        @Inject(forwardRef(() => UserService))
-        private readonly userService: UserService,
         private readonly dataSource: DataSource,
     ) { }
 
-    // async create(createBranchDto: CreateBranchDto): Promise<any> {
-    //     return this.branchRepository.manager
-    //         .transaction(async (transactionalEntityManager) => {
-    //             if (!createBranchDto.id || typeof createBranchDto.id !== 'string') {
-    //                 throw new BadRequestException('Branch id is required and must be a valid string');
-    //             }
-
-    //             const existingBranch = await transactionalEntityManager.findOne(Branch, {
-    //                 where: { id: Equal(createBranchDto.id) },
-    //             });
-    //             if (existingBranch) {
-    //                 throw new BadRequestException(`Branch with id ${createBranchDto.id} already exists`);
-    //             }
-
-    //             const branchId = createBranchDto.id || generateUUID('BR');
-
-    //             let state: State | null = null;
-    //             if (createBranchDto.stateId) {
-    //                 state = await transactionalEntityManager.findOne(State, {
-    //                     where: { id: createBranchDto.stateId },
-    //                 });
-    //                 if (!state) {
-    //                     throw new NotFoundException(`State with ID ${createBranchDto.stateId} not found`);
-    //                 }
-    //             }
-
-    //             let regionalManager: Employee | null = null;
-    //             if (createBranchDto.regionalManagerId) {
-    //                 regionalManager = await transactionalEntityManager.findOne(Employee, {
-    //                     where: { id: createBranchDto.regionalManagerId },
-    //                 });
-    //                 if (!regionalManager) {
-    //                     const employeeDto: CreateEmployeeDto = {
-    //                         employeeId: createBranchDto.regionalManagerId,
-    //                         branchId: branchId,
-    //                         companyId: createBranchDto.companyId,
-    //                         designation: Designation.regionalManager,
-    //                         status: EmployeeStatus.ACTIVE,
-    //                         firstName: createBranchDto.regionalManagerId,
-    //                         email: `dummy.rm.${createBranchDto.regionalManagerId}@company.com`,
-    //                         roleId: roleIds.admin,
-    //                     };
-    //                     const result = await this.employeeService.bulkCreate([employeeDto]);
-    //                     if (result.data.created === 0) {
-    //                         throw new BadRequestException(
-    //                             `Failed to create regional manager: ${result.data.errors[0]?.error}`,
-    //                         );
-    //                     }
-    //                     regionalManager = result.data.createdEntities[0];
-    //                 }
-    //             }
-
-    //             let controlBranch: Branch | null = null;
-    //             const controlBranchId = createBranchDto.controlBranchId?.toUpperCase();
-    //             const isSelfControlBranch = controlBranchId === branchId.toUpperCase();
-
-    //             if (controlBranchId && !isSelfControlBranch) {
-    //                 controlBranch = await transactionalEntityManager.findOne(Branch, {
-    //                     where: { id: controlBranchId },
-    //                 });
-    //                 if (!controlBranch) {
-    //                     throw new NotFoundException(`Control Branch with ID ${controlBranchId} not found`);
-    //                 }
-    //             }
-
-    //             const newBranch = transactionalEntityManager.create(Branch, {
-    //                 id: branchId,
-    //                 name: createBranchDto.name,
-    //                 model: createBranchDto.model,
-    //                 state: state || undefined,
-    //                 city: createBranchDto.city,
-    //                 pincode: createBranchDto.pincode,
-    //                 address: createBranchDto.address,
-    //                 active: createBranchDto.active ?? true,
-    //                 segments: createBranchDto.segments || [],
-    //                 email: createBranchDto.email,
-    //                 phone: createBranchDto.phone,
-    //                 contactPerson: createBranchDto.contactPerson,
-    //                 panNumber: createBranchDto.panNumber,
-    //                 activationDate: createBranchDto.activationDate,
-    //                 regionalManager: regionalManager || undefined,
-    //                 controlBranch: controlBranch || undefined,
-    //                 mappingStatus: createBranchDto.mappingStatus ?? false,
-    //                 sharing: createBranchDto.sharing,
-    //                 terminals: createBranchDto.terminals || [],
-    //             });
-
-    //             let savedBranch = await transactionalEntityManager.save(Branch, newBranch);
-
-    //             // If self-control, assign after save to avoid FK violation
-    //             if (isSelfControlBranch) {
-    //                 savedBranch.controlBranch = savedBranch;
-    //                 savedBranch = await transactionalEntityManager.save(Branch, savedBranch);
-    //             }
-
-    //             // Return clean JSON without circular refs
-    //             const response = {
-    //                 ...savedBranch,
-    //                 controlBranch: isSelfControlBranch
-    //                     ? savedBranch.id
-    //                     : savedBranch.controlBranch?.id ?? null,
-    //                 regionalManager: savedBranch.regionalManager?.id ?? null,
-    //                 state: savedBranch.state ? {
-    //                     id: savedBranch.state.id,
-    //                     name: savedBranch.state.name
-    //                 } : null,
-    //             };
-
-    //             return response;
-    //         })
-    //         .catch((error) => {
-    //             this.logger.error(`Failed to create branch: ${error.message}`);
-    //             if (error instanceof BadRequestException || error instanceof NotFoundException) {
-    //                 throw error;
-    //             }
-    //             throw new BadRequestException(`Failed to create branch: ${error.message}`);
-    //         });
-    // }
-
-    // async bulkCreate(dtos: CreateBranchDto[]): Promise<BulkInsertResult<Branch>> {
-    //     const result: BulkInsertResult<Branch> = {
-    //         statusCode: 201,
-    //         message: 'success',
-    //         data: {
-    //             total: dtos.length,
-    //             created: 0,
-    //             failed: 0,
-    //             errors: [],
-    //             createdEntities: [],
-    //         },
-    //     };
-
-    //     if (dtos.length === 0) {
-    //         this.logger.warn('No branch DTOs provided for bulk creation');
-    //         return {
-    //             statusCode: 400,
-    //             message: 'No branches provided',
-    //             data: { total: 0, created: 0, failed: 0, errors: [], createdEntities: [] },
-    //         };
-    //     }
-
-    //     const dtosWithRowNumber: CreateBranchDtoWithRowNumber[] = dtos.map((dto, index) => ({
-    //         ...dto,
-    //         originalRowNumber: index + 2,
-    //     }));
-
-    //     const graph = new Map<string, string[]>();
-    //     const branchMap = new Map<string, CreateBranchDtoWithRowNumber>();
-    //     const controlBranchIds: Set<string> = new Set();
-
-    //     dtosWithRowNumber.forEach((dto) => {
-    //         branchMap.set(dto.id, dto);
-    //         if (dto.controlBranchId) {
-    //             controlBranchIds.add(dto.controlBranchId);
-    //             if (!graph.has(dto.controlBranchId)) {
-    //                 graph.set(dto.controlBranchId, []);
-    //             }
-    //             graph.get(dto.controlBranchId)!.push(dto.id);
-    //         }
-    //     });
-
-    //     const controlBranches = await this.branchRepository.find({
-    //         where: { id: In(Array.from(controlBranchIds)) },
-    //     });
-    //     const controlBranchMap = new Map(controlBranches.map((branch) => [branch.id, branch]));
-
-    //     const visited = new Set<string>();
-    //     const recursionStack = new Set<string>();
-    //     const cycles = new Set<string>();
-
-    //     const detectCycles = (node: string) => {
-    //         visited.add(node);
-    //         recursionStack.add(node);
-    //         const neighbors = graph.get(node) || [];
-    //         for (const neighbor of neighbors) {
-    //             if (!visited.has(neighbor)) {
-    //                 detectCycles(neighbor);
-    //             } else if (recursionStack.has(neighbor)) {
-    //                 cycles.add(neighbor);
-    //             }
-    //         }
-    //         recursionStack.delete(node);
-    //     };
-
-    //     dtosWithRowNumber.forEach((dto) => {
-    //         if (!visited.has(dto.id)) {
-    //             detectCycles(dto.id);
-    //         }
-    //     });
-
-    //     const dtosToInsert = dtosWithRowNumber.map((dto) => {
-    //         if (cycles.has(dto.id) && dto.controlBranchId) {
-    //             return { ...dto, controlBranchId: null };
-    //         }
-    //         return dto;
-    //     });
-
-    //     const sortedDtos: CreateBranchDtoWithRowNumber[] = [];
-    //     const tempVisited = new Set<string>();
-
-    //     const topologicalSort = (node: string) => {
-    //         if (tempVisited.has(node)) return;
-    //         tempVisited.add(node);
-    //         const neighbors = graph.get(node) || [];
-    //         for (const neighbor of neighbors) {
-    //             topologicalSort(neighbor);
-    //         }
-    //         const dto = dtosToInsert.find((d) => d.id === node);
-    //         if (dto) sortedDtos.push(dto);
-    //     };
-
-    //     dtosToInsert.forEach((dto) => {
-    //         if (!tempVisited.has(dto.id)) {
-    //             topologicalSort(dto.id);
-    //         }
-    //     });
-
-    //     const branchesToCreate = sortedDtos
-    //         .map((dto) => {
-    //             let controlBranch: Branch | null = null;
-    //             if (dto.controlBranchId && !cycles.has(dto.id)) {
-    //                 controlBranch = controlBranchMap.get(dto.controlBranchId.toUpperCase());
-    //                 if (!controlBranch) {
-    //                     result.data.errors.push({
-    //                         row: dto.originalRowNumber,
-    //                         entityName: 'Branch',
-    //                         error: `Control branch with ID ${dto.controlBranchId} not found`,
-    //                     });
-    //                     result.data.failed++;
-    //                     return null;
-    //                 }
-    //             }
-
-    //             return this.branchRepository.create({
-    //                 ...dto,
-    //                 state: dto.stateId ? { id: dto.stateId } : null,
-    //                 regionalManager: null,
-    //                 controlBranch: controlBranch,
-    //             });
-    //         })
-    //         .filter((branch) => branch !== null) as Branch[];
-
-    //     let createdBranches: Branch[] = [];
-    //     try {
-    //         createdBranches = await this.branchRepository.save(branchesToCreate);
-    //     } catch (error) {
-    //         this.logger.error(`Failed to batch insert branches: ${error.message}`);
-    //         result.data.errors.push({
-    //             row: 1,
-    //             entityName: 'Branch',
-    //             error: `Failed to batch insert branches: ${error.message}`,
-    //         });
-    //         result.data.failed += branchesToCreate.length;
-    //         return result;
-    //     }
-
-    //     const regionalManagerIds = new Set<string>();
-    //     sortedDtos.forEach((dto) => {
-    //         if (dto.regionalManagerId) regionalManagerIds.add(dto.regionalManagerId);
-    //     });
-
-    //     const existingEmployees = await this.employeeRepository.find({
-    //         where: { id: In(Array.from(regionalManagerIds)) },
-    //     });
-    //     const existingRmIds = new Set(existingEmployees.map((emp) => emp.id));
-    //     const missingRmIds = Array.from(regionalManagerIds).filter((id) => !existingRmIds.has(id));
-
-    //     const rmToBranchMap = new Map<string, Branch>();
-    //     for (const dto of sortedDtos) {
-    //         if (dto.regionalManagerId && missingRmIds.includes(dto.regionalManagerId)) {
-    //             if (!rmToBranchMap.has(dto.regionalManagerId)) {
-    //                 const branch = createdBranches.find((b) => b.id === dto.id);
-    //                 if (branch) rmToBranchMap.set(dto.regionalManagerId, branch);
-    //             }
-    //         }
-    //     }
-
-    //     const dummyEmployeeDtos: CreateEmployeeDto[] = Array.from(rmToBranchMap).map(([rmId, branch]) => ({
-    //         employeeId: rmId,
-    //         branchId: branch.id,
-    //         companyId: sortedDtos.find((dto) => dto.regionalManagerId === rmId)?.companyId || 1,
-    //         designation: Designation.regionalManager,
-    //         status: EmployeeStatus.ACTIVE,
-    //         firstName: rmId,
-    //         email: `dummy.rm.${rmId}@company.com`,
-    //         roleId: roleIds.admin,
-    //         salary: 0,
-    //         probation: false,
-    //         password: '12345678',
-    //     }));
-
-    //     if (dummyEmployeeDtos.length > 0) {
-    //         const employeeResult = await this.employeeService.bulkCreate(dummyEmployeeDtos);
-    //         if (employeeResult.data.created !== dummyEmployeeDtos.length) {
-    //             employeeResult.data.errors.forEach((err) => {
-    //                 result.data.errors.push({
-    //                     row: err.row,
-    //                     entityName: 'Employee',
-    //                     error: `Failed to create regional manager: ${err.error}`,
-    //                 });
-    //                 result.data.failed++;
-    //             });
-    //         }
-    //     }
-
-    //     const branchesToUpdate = [];
-    //     for (const dto of sortedDtos) {
-    //         if (dto.regionalManagerId) {
-    //             const branch = createdBranches.find((b) => b.id === dto.id);
-    //             if (branch) {
-    //                 const employee = await this.employeeRepository.findOne({ where: { id: dto.regionalManagerId } });
-    //                 if (employee) {
-    //                     branch.regionalManager = employee;
-    //                     branchesToUpdate.push(branch);
-    //                 } else {
-    //                     result.data.errors.push({
-    //                         row: dto.originalRowNumber,
-    //                         entityName: 'Branch',
-    //                         error: `Regional manager with ID ${dto.regionalManagerId} not found after creation`,
-    //                     });
-    //                     result.data.failed++;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     if (branchesToUpdate.length > 0) {
-    //         await this.branchRepository.save(branchesToUpdate);
-    //     }
-
-    //     const updatedControlBranches = [];
-    //     for (const dto of dtosWithRowNumber) {
-    //         if (cycles.has(dto.id) && dto.controlBranchId) {
-    //             const branch = createdBranches.find((b) => b.id === dto.id);
-    //             if (branch) {
-    //                 const controlBranch =
-    //                     controlBranchMap.get(dto.controlBranchId) ||
-    //                     createdBranches.find((b) => b.id === dto.controlBranchId);
-    //                 if (controlBranch) {
-    //                     branch.controlBranch = controlBranch;
-    //                     updatedControlBranches.push(branch);
-    //                 } else {
-    //                     result.data.errors.push({
-    //                         row: dto.originalRowNumber,
-    //                         entityName: 'Branch',
-    //                         error: `Control branch with ID ${dto.controlBranchId} not found for cycle restoration`,
-    //                     });
-    //                     result.data.failed++;
-    //                 }
-    //             }
-    //         }
-    //     }
-
-    //     if (updatedControlBranches.length > 0) {
-    //         await this.branchRepository.save(updatedControlBranches);
-    //     }
-
-    //     result.data.created = createdBranches.length - result.data.failed;
-    //     result.data.createdEntities = createdBranches;
-    //     if (result.data.failed > 0) {
-    //         result.statusCode = 400;
-    //         result.message = `Success: ${result.data.created} records inserted out of ${result.data.total}, with ${result.data.failed} errors`;
-    //     } else {
-    //         result.message = `Success: ${result.data.created} records inserted out of ${result.data.total}`;
-    //     }
-
-    //     return result;
-    // }
-
+    /**
+     * findAll: returns flattened items and a qb usable for counts/filter by caller.
+     * Expects req.QUERY_STRING with 'where', 'orderBy', 'skip', 'limit'
+     */
     async findAll(req: any): Promise<any> {
-        Logger.log('QUERY_String', req?.QUERY_STRING);
-        // Single query for data and counts
-        const branches = await this.branchRepository
+        const q = req?.QUERY_STRING ?? {};
+        const whereClause = q.where ?? '1=1';
+        const skip = Number(q.skip ?? 0);
+        const limit = Number(q.limit ?? 10);
+        const orderByKey = (q.orderBy?.key) ? q.orderBy.key : 'createdAt';
+        const orderByDir = (q.orderBy?.dir) ? q.orderBy.dir : 'DESC';
+
+        const qb = this.branchRepository
             .createQueryBuilder('branch')
+            .leftJoinAndSelect('branch.corporate', 'corporate')
+            .leftJoinAndSelect('branch.state', 'state')
             .leftJoinAndSelect('branch.controlBranch', 'controlBranch')
             .leftJoinAndSelect('branch.regionalManager', 'regionalManager')
             .where('branch.deletedAt IS NULL')
-            // .andWhere('branch.model = :model', { model: BranchModels.BRANCH })
-            .andWhere(req?.QUERY_STRING?.where || '1=1')
-            .orderBy(orderByKey({ key: req?.QUERY_STRING?.orderBy?.key, repoAlias: 'branch' }), orderByValue({ req }))
-            .offset(req?.QUERY_STRING?.skip || 0)
-            .limit(req?.QUERY_STRING?.limit || 10)
-            .getMany();
+            .andWhere(whereClause)
+            .orderBy(`branch.${orderByKey}`, orderByDir as 'ASC' | 'DESC')
+            .offset(skip)
+            .limit(limit);
 
-        // Transform results
-        const items = branches.map((branch: any) => ({
-            id: branch.id,
-            name: branch.name,
-            city: branch.city,
-            email: branch.email,
-            phone: branch.phone,
-            model: branch.model,
-            controlBranch: branch.controlBranch ? { id: branch.controlBranch.id, name: branch.controlBranch.name } : null,
-            regionalManager: branch.regionalManager ? { id: branch.regionalManager.id, name: branch.regionalManager.name } : null,
-            active: branch.active,
-            createdAt: branch.createdAt,
-            updatedAt: branch.updatedAt,
-            deletedAt: branch.deletedAt,
+        const branches = await qb.getMany();
+
+        const items = branches.map((b) => ({
+            id: b.id,
+            branchCode: b.branchCode,
+            name: b.name,
+
+            corporateId: b.corporate?.id ?? null,
+            corporateName: b.corporate?.corporateName ?? null,
+
+            stateId: b.state?.id ?? null,
+            stateName: (b.state as any)?.stateName ?? (b.state as any)?.name ?? null,
+
+            city: b.city ?? null,
+            pincode: b.pincode ?? null,
+            address: b.address ?? null,
+
+            email: b.email ?? null,
+            phone: b.phone ?? null,
+            panNumber: b.panNumber ?? null,
+            contactPerson: b.contactPerson ?? null,
+
+            activationDate: b.activationDate ?? null,
+            segments: b.segments ?? [],
+
+            regionalManagerId: b.regionalManager?.id ?? null,
+            regionalManagerName: (b.regionalManager as any)?.name ?? null,
+
+            controlBranchId: b.controlBranch?.id ?? null,
+            controlBranchName: b.controlBranch?.name ?? null,
+
+            isActive: b.isActive,
+            createdAt: b.createdAt,
+            updatedAt: b.updatedAt,
         }));
 
-        // Create query builder for additional queries
-        const qb = this.branchRepository
+        // total count (for pagination)
+        const total = await this.branchRepository
             .createQueryBuilder('branch')
-            // .where('branch.model = :model', { model: BranchModels.BRANCH })
-            .andWhere('branch.deletedAt IS NULL')
-            .andWhere(req.where || '1=1'); // Safe default for where clause
+            .where('branch.deletedAt IS NULL')
+            .andWhere(whereClause)
+            .getCount();
 
-        return { qb, items };
+        return {
+            status: true,
+            message: 'success',
+            items,
+            total,
+            page: Math.floor(skip / limit) + 1,
+            limit,
+        };
     }
-
-    async findById(id: string, manager?: EntityManager): Promise<Branch> {
-        const repo = manager ? manager.getRepository(Branch) : this.branchRepository;
-        const branch = await repo.findOne({
+    async findById(id: string): Promise<Branch | null> {
+        return this.branchRepository.findOne({
             where: { id },
-            relations: {
-                controlBranch: true,
-                regionalManager: true,
-                state: true,
-            }
+            relations: ['corporate', 'state', 'controlBranch', 'regionalManager'],
         });
-        if (!branch) throw new Error(`Branch with ID ${id} not found`);
-        return branch;
     }
 
-    async update(id: string, updateBranchDto: UpdateBranchDto): Promise<Branch> {
-        return this.branchRepository.manager.transaction(async (transactionalEntityManager) => {
-            const branch = await this.findById(id, transactionalEntityManager);
+    // fetch single branch and return flattened object
+    async findByIdFlattened(id: string): Promise<any> {
+        const b = await this.branchRepository.findOne({
+            where: { id },
+            relations: ['corporate', 'state', 'controlBranch', 'regionalManager'],
+        });
+        if (!b) throw new Error('Branch not found');
 
-            Object.assign(branch, {
-                ...updateBranchDto,
-                activationDate: updateBranchDto.activationDate,
-                state: updateBranchDto.stateId ? { id: updateBranchDto.stateId } : branch.state,
-                regionalManager: updateBranchDto.regionalManagerId
-                    ? { id: updateBranchDto.regionalManagerId }
-                    : branch.regionalManager,
-                controlBranch: updateBranchDto.controlBranchId
-                    ? { id: updateBranchDto.controlBranchId }
-                    : branch.controlBranch,
+        return {
+            status: true,
+            message: 'success',
+            data: {
+                id: b.id,
+                branchCode: b.branchCode,
+                name: b.name,
+                corporateId: b.corporate?.id ?? null,
+                corporateName: b.corporate?.corporateName ?? null,
+                stateId: b.state?.id ?? null,
+                stateName: (b.state as any)?.stateName ?? (b.state as any)?.name ?? null,
+                city: b.city,
+                pincode: b.pincode,
+                address: b.address,
+                email: b.email,
+                phone: b.phone,
+                panNumber: b.panNumber,
+                contactPerson: b.contactPerson,
+                activationDate: b.activationDate,
+                regionalManagerId: b.regionalManager?.id ?? null,
+                regionalManagerName: (b.regionalManager as any)?.name ?? null,
+                controlBranchId: b.controlBranch?.id ?? null,
+                controlBranchName: b.controlBranch?.name ?? null,
+                isActive: b.isActive,
+                createdAt: b.createdAt,
+                updatedAt: b.updatedAt,
+            },
+        };
+    }
+
+    // create branch (accepts flattened DTO)
+    async create(dto: CreateBranchDto): Promise<any> {
+        return this.branchRepository.manager.transaction(async (em: EntityManager) => {
+            const branch = em.create(Branch, {
+                id: dto.id ?? dto.branchCode,
+                branchCode: dto.branchCode,
+                name: dto.name,
+
+                corporate: dto.corporateId ? { id: Number(dto.corporateId) } : null,
+                state: dto.stateId ? { id: Number(dto.stateId) } : null,
+                city: dto.city,
+                pincode: dto.pincode,
+                isActive: dto.isActive ?? true,
+                address: dto.address,
+                segments: dto.segments ?? [],
+                email: dto.email,
+                phone: dto.phone,
+                panNumber: dto.panNumber,
+                activationDate: dto.activationDate,
+                contactPerson: dto.contactPerson,
+
+                regionalManager: dto.regionalManagerId
+                    ? ({ id: Number(dto.regionalManagerId) } as any)
+                    : null,
+
+                controlBranch: dto.controlBranchId
+                    ? ({ id: Number(dto.controlBranchId) } as any)
+                    : null,
             });
 
-            return await transactionalEntityManager.save(Branch, branch);
+            const saved = await em.save(Branch, branch);
+            return { status: true, message: 'success', data: { id: saved.id } };
         });
     }
 
-    async toggleStatus(id: string): Promise<Branch> {
+
+    async update(id: string, dto: UpdateBranchDto): Promise<any> {
+        return this.branchRepository.manager.transaction(async (em: EntityManager) => {
+            const repo = em.getRepository(Branch);
+            const branch = await repo.findOne({ where: { id } });
+            if (!branch) throw new Error('Branch not found');
+
+            if (dto.branchCode !== undefined) branch.branchCode = dto.branchCode;
+            if (dto.name !== undefined) branch.name = dto.name;
+            if (dto.corporateId !== undefined) (branch as any).corporate = dto.corporateId ? { id: dto.corporateId } : null;
+            if (dto.stateId !== undefined) (branch as any).state = dto.stateId ? { id: dto.stateId } : null;
+            if (dto.city !== undefined) branch.city = dto.city;
+            if (dto.pincode !== undefined) branch.pincode = dto.pincode;
+            if (dto.address !== undefined) branch.address = dto.address;
+            if (dto.email !== undefined) branch.email = dto.email;
+            if (dto.phone !== undefined) branch.phone = dto.phone;
+            if (dto.panNumber !== undefined) branch.panNumber = dto.panNumber;
+            if (dto.activationDate !== undefined) branch.activationDate = dto.activationDate as any;
+            if (dto.contactPerson !== undefined) branch.contactPerson = dto.contactPerson;
+            if (dto.regionalManagerId !== undefined) (branch as any).regionalManager = dto.regionalManagerId ? ({ id: dto.regionalManagerId } as any) : null;
+            if (dto.controlBranchId !== undefined) (branch as any).controlBranch = dto.controlBranchId ? ({ id: dto.controlBranchId } as any) : null;
+            if (dto.isActive !== undefined) branch.isActive = dto.isActive;
+
+            const saved = await em.save(Branch, branch);
+            return { status: true, message: 'success', data: { id: saved.id } };
+        });
+    }
+
+    async toggleStatus(id: string): Promise<any> {
         const branch = await this.branchRepository.findOne({ where: { id } });
-
-        if (!branch) {
-            throw new Error(`Branch with id ${id} not found`);
-        }
-        Logger.log('status', branch.isActive);
+        if (!branch) throw new Error('Branch not found');
         branch.isActive = !branch.isActive;
-        Logger.log('status 2', branch.isActive);
-
-        return this.branchRepository.save(branch);
+        const saved = await this.branchRepository.save(branch);
+        return { status: true, message: 'success', data: { id: saved.id, isActive: saved.isActive } };
     }
 
-    async remove(id: string): Promise<void> {
-        await this.branchRepository.manager.transaction(async (transactionalEntityManager) => {
-            const branch = await this.findById(id, transactionalEntityManager);
-
-            // await transactionalEntityManager.softDelete(BranchRevenue, { branchId: id });
-            await transactionalEntityManager.softDelete(Branch, id);
-        });
+    async remove(id: string): Promise<any> {
+        await this.branchRepository.softDelete(id);
+        return { status: true, message: 'deleted' };
     }
-
-
-    // async resolveBranchIds(employee: Employee): Promise<string[]> {
-
-    //     switch (employee.designation) {
-    //         case Designation.regionalManager:
-    //             const regionalBranches = await this.dataSource.getRepository(Branch).find({
-    //                 where: { regionalManager: { id: employee.id }, model: BranchModels.BRANCH },
-    //                 select: ['id'],
-    //             });
-    //             return regionalBranches.map(branch => branch.id);
-    //         case Designation.branchManager:
-    //             const subBranches = await this.dataSource.getRepository(Branch).find({
-    //                 where: { id: employee.branch.id },
-    //                 relations: ['subBranches'],
-    //             });
-
-    //             const subBranchIds = subBranches.flatMap(branch => branch.subBranches.map(sub => sub.id));
-    //             return subBranchIds;
-
-    //         case Designation.superAdmin:
-    //             const allBranches = await this.dataSource.getRepository(Branch).find({
-    //                 where: { model: BranchModels.BRANCH },
-    //                 select: ['id'],
-    //             });
-    //             return allBranches.map(branch => branch.id);
-    //         default:
-    //             this.logger.warn(`Unsupported designation: ${employee.designation}`);
-    //             return [];
-    //     }
-    // }
 
     async getAllBranches(): Promise<any> {
-        try {
-            return await this.branchRepository.find({
-                select: ['id'],
-                where: {
-                    // model: In([BranchModels.BRANCH, BranchModels.FRANCHISE])
-                }
-            })
-
-        } catch (error) {
-            this.logger.error(`Failed to fetch subbranch revenue: ${error.message}`);
-            throw error;
-        }
+        const result = await this.branchRepository.find({
+            select: ['id', 'name'],
+            where: { /* model filtering if needed */ },
+        });
+        return { status: true, message: 'success', data: result };
     }
 
-
-     async getBranch(): Promise<any> {
-        try {
-
-            const query = 'CALL get_branch()'
-
-            const result = await this.branchRepository.query(query);
-            return {
-                status:'success',
-                message: 'success fully data fetch',
-                result:result[0]
-
+    // Bulk upload: expects { data: any[], startIndex?: number }
+    async branchBulkUpload(body: any): Promise<any> {
+        const arr: any[] = body.data ?? body.batch ?? [];
+        const failed: any[] = [];
+        for (let i = 0; i < arr.length; i++) {
+            const row = arr[i];
+            try {
+                // basic validation - change as per requirement
+                if (!row.branchCode || !row.name || !row.corporateId) {
+                    failed.push({ index: (body.startIndex ?? 0) + i + 1, reason: 'Missing required fields' });
+                    continue;
+                }
+                // upsert behaviour: if exists update else create
+                const exists = await this.branchRepository.findOne({ where: { id: row.id ?? row.branchCode } });
+                if (exists) {
+                    exists.branchCode = row.branchCode ?? exists.branchCode;
+                    exists.name = row.name ?? exists.name;
+                    exists.corporate = row.corporateId ? ({ id: row.corporateId } as any) : exists.corporate;
+                    if (row.stateId) (exists as any).state = { id: row.stateId };
+                    exists.city = row.city ?? exists.city;
+                    exists.pincode = row.pincode ?? exists.pincode;
+                    exists.address = row.address ?? exists.address;
+                    exists.email = row.email ?? exists.email;
+                    exists.phone = row.phone ?? exists.phone;
+                    await this.branchRepository.save(exists);
+                } else {
+                    const branch = this.branchRepository.create({
+                        id: row.id ?? row.branchCode,
+                        branchCode: row.branchCode,
+                        name: row.name,
+                        corporate: row.corporateId ? ({ id: row.corporateId } as any) : null,
+                        state: row.stateId ? ({ id: row.stateId } as any) : null,
+                        city: row.city,
+                        pincode: row.pincode,
+                        address: row.address,
+                        email: row.email,
+                        phone: row.phone,
+                        panNumber: row.panNumber,
+                        contactPerson: row.contactPerson,
+                        isActive: row.isActive === undefined ? true : !!row.isActive,
+                    });
+                    await this.branchRepository.save(branch);
+                }
+            } catch (err) {
+                failed.push({ index: (body.startIndex ?? 0) + i + 1, reason: err.message ?? 'Server error' });
             }
-
-        } catch (error) {
-            this.logger.error(`Failed to fetch subbranch revenue: ${error.message}`);
-            throw error;
         }
+
+        return {
+            status: true,
+            message: 'bulk processed',
+            result: { failed, processed: arr.length - failed.length },
+        };
     }
 }
