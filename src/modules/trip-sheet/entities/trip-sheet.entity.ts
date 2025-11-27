@@ -6,7 +6,8 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    Index
 } from 'typeorm';
 import { User } from '@modules/user/user.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
@@ -14,9 +15,10 @@ import { Vehicle } from '@modules/vehicle/entities/vehicle.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
 import { TripSheetStatus } from './trip-sheet-status.entity';
 import { Branch } from '@modules/branch/entities/branch.entity';
+import { TripSheetStatusEnum } from 'src/utils/app.utils';
 
-@Entity({ name: 'first_trip_sheet' })
-export class FirstTripSheet {
+@Entity({ name: 'trip_sheet' })
+export class TripSheet {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -32,16 +34,20 @@ export class FirstTripSheet {
     @JoinColumn({ name: 'vehicle_id' })
     vehicle: Vehicle;
 
-    @ManyToOne(() => Driver)
+    // @ManyToOne(() => Driver)
+    // @JoinColumn({ name: 'driver_id' })
+    // driver: Driver;
+
+    @Index('idx_driver_id_in_trip_sheet')     // <-- Add INDEX here
+    @ManyToOne(() => Driver, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'driver_id' })
     driver: Driver;
 
-    @ManyToOne(() => TripSheetStatus)
-    @JoinColumn({ name: 'id' })
-    status: TripSheetStatus;
+    @Column({ type:'int', name: 'trip_status' })
+    tripStatus: TripSheetStatusEnum;
 
-    @Column({ type: 'date', name: 'trip_date', nullable: false })
-    date: Date;
+    @Column({ type: 'date', name: 'trip_date', nullable: true })
+    tripDate: Date;
 
     @Column({ type: 'time', name: 'start_time', nullable: true })
     startTime: string;

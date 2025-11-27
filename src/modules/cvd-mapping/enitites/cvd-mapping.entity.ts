@@ -68,7 +68,9 @@ import {
     PrimaryGeneratedColumn,
     UpdateDateColumn,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    Unique,
+    Index
 } from 'typeorm';
 import { User } from '@modules/user/user.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
@@ -77,38 +79,24 @@ import { Driver } from '@modules/driver/entities/driver.entity';
 import { Vehicle } from '@modules/vehicle/entities/vehicle.entity';
 
 @Entity({ name: 'cvd_mapping' })
+@Unique(['driver'])
 export class CvdMapping {
     @PrimaryGeneratedColumn()
     id: number;
-
-    // ============== SCALAR FKs ==================
-    @Column({ name: 'corporate_id' })
-    corporateId: number;
-
-    @Column({ name: 'branch_id' })
-    branchId: string;
-
-    @Column({ name: 'vehicle_id' })
-    vehicleId: number;
-
-    @Column({ name: 'driver_id' })
-    driverId: number;
-
     // ============== RELATIONS ===================
-    @ManyToOne(() => Corporate, c => c.cvdMapping, { nullable: false })
+    @ManyToOne(() => Corporate, c => c.cvdMapping, { nullable: true })
     @JoinColumn({ name: 'corporate_id' })
     corporate: Corporate;
    
-    @ManyToOne(() => Branch, branch => branch.cvdMapping)
-    @JoinColumn({ name: 'branch_id', referencedColumnName: 'id' })
+    @ManyToOne(() => Branch, branch => branch.cvdMapping, {nullable: false})
+    @JoinColumn({ name: 'branch_id'})
     branch: Branch;
-
-    
 
     @ManyToOne(() => Vehicle, v => v.cvdMapping, { nullable: false })
     @JoinColumn({ name: 'vehicle_id' })
     vehicle: Vehicle;
 
+     @Index('idx_driver_id_in_cvd', {unique:true}) 
     @ManyToOne(() => Driver, d => d.cvdMapping, { nullable: false })
     @JoinColumn({ name: 'driver_id' })
     driver: Driver;
