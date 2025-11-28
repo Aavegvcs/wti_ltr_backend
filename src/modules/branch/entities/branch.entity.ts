@@ -11,7 +11,8 @@ import {
     PrimaryColumn,
     OneToOne,
     ManyToMany,
-    JoinTable
+    JoinTable,
+    PrimaryGeneratedColumn
 } from 'typeorm';
 import { State } from '@modules/states/entities/state.entity';
 import { branchModelsArr } from 'src/utils/app.utils';
@@ -21,8 +22,11 @@ import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Entity({ name: 'branch' })
 export class Branch extends BaseEntity {
-    @PrimaryColumn({ unique: true, type: 'varchar', length: 50 })
-    id: string;
+    // @PrimaryColumn({ unique: true, type: 'varchar', length: 50 })
+    // id: string;
+    @PrimaryGeneratedColumn()
+    id: number;
+
 
     @Column({ name: 'branch_code', unique: true })
     branchCode: string;

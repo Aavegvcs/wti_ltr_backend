@@ -98,7 +98,6 @@ export class CorporateController {
     findOne(@Param('id') id: number) {
         return this.corporateService.findCorporateById(id);
     }
-   
-   
+  
 
 }
