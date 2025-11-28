@@ -122,13 +122,6 @@ export class User extends BaseEntity {
     @Column({ nullable: true })
     zip: string;
 
-    @OneToMany(() => Branch, (branch) => branch.regionalManager, { nullable: true })
-    managedBranches: Branch[];
-
-    // New one-to-many relationship for branches where the employee is an RM
-    @OneToMany(() => Branch, (branch) => branch.rm, { nullable: true })
-    rmBranches: Branch[];
-
     @Column({ name: 'is_active', type: 'boolean', default: true })
     isActive: boolean;
 
