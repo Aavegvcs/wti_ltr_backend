@@ -50,30 +50,11 @@ export class Branch extends BaseEntity {
     @Column()
     address: string;
 
-    @Column({ type: 'simple-array', nullable: true })
-    segments: string[];
-
     @Column({ nullable: true })
     email: string;
 
-    @ManyToOne(() => User, user => user.managedBranches, { nullable: true })
-    regionalManager: User;
-
-    @ManyToOne(() => User, user => user.rmBranches, { nullable: true })
-    @JoinColumn({ name: 'rmId' })
-    rm: User;
-
     @Column({ nullable: true })
     phone: string;
-
-    @Column({ nullable: true })
-    panNumber: string;
-
-    @Column({ type: 'date', nullable: true })
-    activationDate: Date;
-
-    @Column({ name: 'contact_person', nullable: true })
-    contactPerson: string;
 
     @CreateDateColumn()
     createdAt: Date;
@@ -83,15 +64,6 @@ export class Branch extends BaseEntity {
 
     @DeleteDateColumn()
     deletedAt: Date;
-
-    // Control branch (parent)
-    @ManyToOne(() => Branch, branch => branch.subBranches, { nullable: true })
-    @JoinColumn({ name: 'control_branch_id' })
-    controlBranch: Branch;
-
-    // Sub-branches (children)
-    @OneToMany(() => Branch, branch => branch.controlBranch)
-    subBranches: Branch[];
 
     @OneToMany(() => User, (user) => user.branch)
     employees: User[];

@@ -55,6 +55,12 @@ export class TripSheet {
     @Column({ type: 'time', name: 'end_time', nullable: true })
     endTime: string;
 
+    @Column({ type: 'int', name: 'start_odometer', nullable: true })
+    startOdometer: number;
+
+    @Column({ type: 'int', name: 'end_odometer', nullable: true })
+    endOdometer: number;
+
     @Column({ type: 'decimal', name: 'total_km', precision: 10, scale: 2, nullable: true })
     totalKm: number;
 

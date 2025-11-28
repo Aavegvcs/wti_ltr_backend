@@ -39,26 +39,26 @@ export class BranchController {
         return this.branchService.findAll(req);
     }
 
-    @UseGuards(JwtAuthGuard)
-    @Get(':id')
-    @ApiOperation({ summary: 'Get a branch by ID' })
-    async findOne(@Param('id') id: string) {
-        return this.branchService.findById(id);
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Get(':id')
+    // @ApiOperation({ summary: 'Get a branch by ID' })
+    // async findOne(@Param('id') id: string) {
+    //     return this.branchService.findById(id);
+    // }
 
-    @UseGuards(JwtAuthGuard)
-    @Patch(':id')
-    @ApiOperation({ summary: 'Update a branch' })
-    async update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
-        return this.branchService.update(id, updateBranchDto);
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Patch(':id')
+    // @ApiOperation({ summary: 'Update a branch' })
+    // async update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
+    //     return this.branchService.update(id, updateBranchDto);
+    // }
 
-    @UseGuards(JwtAuthGuard)
-    @Delete(':id')
-    @ApiOperation({ summary: 'Delete a branch' })
-    async remove(@Param('id') id: string) {
-        return this.branchService.remove(id);
-    }
+    // @UseGuards(JwtAuthGuard)
+    // @Delete(':id')
+    // @ApiOperation({ summary: 'Delete a branch' })
+    // async remove(@Param('id') id: string) {
+    //     return this.branchService.remove(id);
+    // }
 
 
     @Post('get-all-branches')
