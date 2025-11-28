@@ -1,210 +1,71 @@
-import { Column } from 'typeorm';
+
 import { ApiProperty } from '@nestjs/swagger';
 
-// DTO is data transfer object
-export class CompanyCreateDto {
-    @ApiProperty({
-        description: 'Company Name',
-        example: 'ITS'
-    })
-    @Column({
-        unique: true
-    })
-    companyName: string;
+export class CreateCorporateDto {
 
-    @ApiProperty({
-        description: 'Practice Website',
-        example: 'website.com'
-    })
-    @Column({ nullable: true })
-    practiceWebsite: string;
+  @ApiProperty()
+  corporateCode: string;
 
-    @ApiProperty({
-        description: 'Site Shortname',
-        example: 'its'
-    })
-    @Column({ nullable: true })
-    siteShortName: string;
+  @ApiProperty()
+  corporateName: string;
 
-    @ApiProperty({
-        description: 'Legal Name',
-        example: 'ITS'
-    })
-    @Column({ nullable: true })
-    legalName: string;
+  @ApiProperty({ required: false })
+  timezone?: string;
 
-    @ApiProperty({
-        description: 'Country',
-        example: 4438
-    })
-    @Column({ nullable: true })
-    country: number;
+  @ApiProperty({ required: false })
+  corporateLogo?: string;
 
-    @ApiProperty({
-        description: 'Timezone',
-        example: 'Central Standard Time'
-    })
-    @Column({ nullable: true })
-    timezone: string;
+  @ApiProperty({ required: false })
+  dateFormat?: string;
 
-    @ApiProperty({
-        description: 'Date Format',
-        example: 'MM:DD:YYYY'
-    })
-    @Column({ nullable: true })
-    dateFormat: string;
+  @ApiProperty({ required: false })
+  currency?: string;
 
-    // @ApiProperty({
-    //   description: 'Default Biling Place of Service',
-    //   example: 'USA',
-    // })
-    // @Column({ nullable: true})
-    // defaultBillingPlaceOfService: string;
+  @ApiProperty({ required: false })
+  phoneNumber?: string;
 
-    // @ApiProperty({
-    //   description: 'Business Associate Agreement File (pdf, doc)',
-    //   example: 'Upload file (pdf,doc)',
-    // })
-    // @Column({ nullable: true})
-    // businessAssociateAgreementFile: string;
+  @ApiProperty({ required: false })
+  secondaryPhoneNumber?: string;
 
-    // @ApiProperty({
-    //   description: 'Bill Client BY',
-    //   example: 'bank Name',
-    // })
-    // @Column({ nullable: true})
-    // billClientBy: string;
+  @ApiProperty({ required: false })
+  adminName?: string;
 
-    // @ApiProperty({
-    //   description: 'Tax ID Type',
-    //   example: ' SSN',
-    // })
-    // @Column({ nullable: true})
-    // taxIdType: string;
+  @ApiProperty({ required: false })
+  numberOfVehicle?: string;
 
-    // @ApiProperty({
-    //   description: 'Tax ID',
-    //   example: ' 1',
-    // })
-    // @Column({ nullable: true})
-    // taxId: string;
+  @ApiProperty({ required: false })
+  gst?: string;
 
-    // @ApiProperty({
-    //   description: 'Business Type',
-    //   example: 'Foreign',
-    // })
-    // @Column({ nullable: true})
-    // businessType: string;
+  @ApiProperty({ required: false })
+  panNumber?: string;
 
-    // @ApiProperty({
-    //   description: 'Company Type',
-    //   example: ' SSN',
-    // })
-    // @Column({ nullable: true})
-    // companyType: string;
+  @ApiProperty({ required: false })
+  po_number?: string;
 
-    // @ApiProperty({
-    //   description: 'License Number',
-    //   example: ' 123-CTB',
-    // })
-    // @Column({ nullable: true})
-    // licenseNumber: string;
+  @ApiProperty({ required: false })
+  po_date?: Date;
 
-    @ApiProperty({
-        description: 'Currency',
-        example: ' $ , INR'
-    })
-    @Column({ nullable: true })
-    currency: string;
+  @ApiProperty({ required: false })
+  po_validity?: Date;
 
-    // @ApiProperty({
-    //   description: 'Diagnostic Code',
-    //   example: '1-CSR',
-    // })
-    // @Column({ nullable: true})
-    // diagnosticCode: string;
+  @ApiProperty({ required: false })
+  documents?: any;
 
-    // @ApiProperty({
-    //   description: 'OrganizationNPI',
-    //   example: ' organization npi',
-    // })
-    // @Column({ nullable: true})
-    // organizationNPI: string;
+  @ApiProperty({ required: false })
+  address?: string;
 
-    // @ApiProperty({
-    //   description: 'FacilityNPI',
-    //   example: ' facility npi',
-    // })
-    // @Column({ nullable: true})
-    // facilityNPI: string;
+  @ApiProperty({ required: false })
+  fax?: string;
 
-    @ApiProperty({
-        description: 'City',
-        example: 4438
-    })
-    @Column({ nullable: true })
-    city: number;
+  @ApiProperty({ required: false })
+  email?: string;
 
-    @ApiProperty({
-        description: 'State',
-        example: 4438
-    })
-    @Column({ nullable: true })
-    state: number;
+  @ApiProperty({ example: true })
+  isActive?: boolean;
 
-    @ApiProperty({
-        description: 'Zip',
-        example: ' 4657-YHU'
-    })
-    @Column({ nullable: true })
-    zip: string;
+  @ApiProperty()
+  country: number;
 
-    @ApiProperty({
-        description: 'Phone Number',
-        example: ' 675879'
-    })
-    @Column({ nullable: true })
-    phoneNumber: string;
-
-    @ApiProperty({
-        description: 'Secondary Phone Number',
-        example: ' 675879'
-    })
-    @Column({ nullable: true })
-    secondaryPhoneNumber: string;
-
-    @ApiProperty({
-        description: 'Fax Number',
-        example: ' 675879'
-    })
-    @Column({ nullable: true })
-    fax: string;
-
-    @ApiProperty({
-        description: 'address',
-        example: ' 675879'
-    })
-    @Column({ nullable: true })
-    address: string;
-
-    @ApiProperty({
-        description: 'Company Logo',
-        example: ' company logo'
-    })
-    @Column({ nullable: true })
-    companyLogo: string;
-
-    @ApiProperty({
-        description: 'created By',
-        example: ' created by logged in user Id'
-    })
-    @Column({ nullable: false })
-    createdBy: string;
-
-    @ApiProperty({
-        description: 'status',
-        example: ' active / inactive'
-    })
-    @Column({ nullable: false })
-    status: string;
+  @ApiProperty()
+  state: number;
 }

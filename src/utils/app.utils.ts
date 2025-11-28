@@ -902,7 +902,8 @@ export enum InsuranceModuleType {
     escalation = 'escalation',
     quotation = 'quotation',
     roleMapping = 'roleMapping',
-    admin = 'admin'
+    admin = 'admin',
+    employee = 'employee'
 }
 
 

@@ -43,17 +43,14 @@ export class TripSheet {
     @JoinColumn({ name: 'driver_id' })
     driver: Driver;
 
-    @Column({ type:'int', name: 'trip_status' })
+    @Column({ type: 'int', name: 'trip_status' })
     tripStatus: TripSheetStatusEnum;
 
     @Column({ type: 'datetime', name: 'trip_date', nullable: true })
     tripDate: Date;
 
-    @Column({ type: 'datetime', name: 'start_time', nullable: true })
-    startTime: Date;
-
-    @Column({ type: 'datetime', name: 'end_time', nullable: true })
-    endTime: Date;
+    @Column({ type: 'time', name: 'start_time', nullable: true })
+    startTime: string;
 
     @Column({ type: 'int', name: 'start_odometer', nullable: true })
     startOdometer: number;
@@ -61,7 +58,13 @@ export class TripSheet {
     @Column({ type: 'int', name: 'end_odometer', nullable: true })
     endOdometer: number;
 
-    @Column({ type: 'int', name: 'total_km', nullable: true })
+
+    @Column({ type: 'time', name: 'end_time', nullable: true })
+    endTime: string;
+
+   
+
+    @Column({ type: 'decimal', name: 'total_km', precision: 10, scale: 2, nullable: true })
     totalKm: number;
 
     @Column({ name: 'source_name', type: 'varchar', length: 255, nullable: true })
