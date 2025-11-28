@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { TripSheetService } from './trip-sheet.service';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
+import { UpdateTripSheetDto } from './dto/update-tripsheet.dto';
 
 @ApiTags('trip-sheet')
 @Controller('tripsheet')
@@ -12,6 +13,11 @@ export class TripSheetController {
     @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })
     async newTripsheetApi(@Body() body: any) {
         return this.tripSheetService.newTripsheetApi(body);
+    }
+    @Patch('updateTripsheetApi')
+    @ApiOperation({ summary: 'Get or udpate trip sheet by driver mobile & date' })
+    async updateTripsheetApi(@Body() body: any) {
+        return this.tripSheetService.updateTripsheetApi(body);
     }
     @Post('get-or-create')
     @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })

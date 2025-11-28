@@ -46,14 +46,14 @@ export class TripSheet {
     @Column({ type:'int', name: 'trip_status' })
     tripStatus: TripSheetStatusEnum;
 
-    @Column({ type: 'date', name: 'trip_date', nullable: true })
+    @Column({ type: 'datetime', name: 'trip_date', nullable: true })
     tripDate: Date;
 
-    @Column({ type: 'time', name: 'start_time', nullable: true })
-    startTime: string;
+    @Column({ type: 'datetime', name: 'start_time', nullable: true })
+    startTime: Date;
 
-    @Column({ type: 'time', name: 'end_time', nullable: true })
-    endTime: string;
+    @Column({ type: 'datetime', name: 'end_time', nullable: true })
+    endTime: Date;
 
     @Column({ type: 'int', name: 'start_odometer', nullable: true })
     startOdometer: number;
@@ -61,7 +61,7 @@ export class TripSheet {
     @Column({ type: 'int', name: 'end_odometer', nullable: true })
     endOdometer: number;
 
-    @Column({ type: 'decimal', name: 'total_km', precision: 10, scale: 2, nullable: true })
+    @Column({ type: 'int', name: 'total_km', nullable: true })
     totalKm: number;
 
     @Column({ name: 'source_name', type: 'varchar', length: 255, nullable: true })
@@ -70,34 +70,34 @@ export class TripSheet {
     @Column({ name: 'destination_name', type: 'varchar', length: 255, nullable: true })
     destinationName: string;
 
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'start_lat', nullable: true })
+    startLat: number;
+
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'start_lng', nullable: true })
+    startLng: number;
+
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'end_lat', nullable: true })
+    endLat: number;
+
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'end_lng', nullable: true })
+    endLng: number;
+
     @Column({ name: 'driver_sign', nullable: true })
     driverSign: string;
 
     @Column({ name: 'user_sign', nullable: true })
     userSign: string;
 
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'start_lat', nullable: true })
-    startLat: number;
-
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'start_lng', nullable: true })
-    startLng: number;
-
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'end_lat', nullable: true })
-    endLat: number;
-
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'end_lng', nullable: true })
-    endLng: number;
-
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'driver_sign_lat', nullable: true })
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'driver_sign_lat', nullable: true })
     driverSignLat: number;
 
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'driver_sign_lng', nullable: true })
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'driver_sign_lng', nullable: true })
     driverSignLng: number;
 
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'user_sign_lat', nullable: true })
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'user_sign_lat', nullable: true })
     userSignLat: number;
 
-    @Column({ type: 'decimal', precision: 10, scale: 6, name: 'user_sign_lng', nullable: true })
+    @Column({ type: 'decimal', precision: 11, scale: 7, name: 'user_sign_lng', nullable: true })
     userSignLng: number;
 
     @Column({ type: 'json', name: 'documents', nullable: true })
