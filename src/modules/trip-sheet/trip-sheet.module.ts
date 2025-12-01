@@ -12,6 +12,7 @@ import { Driver } from '@modules/driver/entities/driver.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 import { TripWorker } from './trip-sheet-worker.processor';
 import { BullModule } from '@nestjs/bull';
+import { TripSheetHistory } from './entities/trip-sheet-history.entity';
 
 @Module({
     imports: [
@@ -20,7 +21,8 @@ import { BullModule } from '@nestjs/bull';
             TripSheetStatus,
             TripSheet,
             Driver,
-            CvdMapping
+            CvdMapping,
+            TripSheetHistory
         ]),
          forwardRef(() => UserModule),
          forwardRef(() => AuthModule),

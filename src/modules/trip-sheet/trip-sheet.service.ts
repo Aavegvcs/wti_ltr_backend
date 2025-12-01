@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
@@ -11,6 +11,7 @@ import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { TripSheetHistory } from './entities/trip-sheet-history.entity';
 
 @Injectable()
 export class TripSheetService {
@@ -26,6 +27,9 @@ export class TripSheetService {
 
         @InjectRepository(CvdMapping)
         private readonly cvdMappingRepo: Repository<CvdMapping>,
+
+        @InjectRepository(TripSheetHistory)
+        private readonly tripSheetHistoryRepo: Repository<TripSheetHistory>,
 
         private readonly loggedInsUserService: LoggedInsUserService,
         @InjectQueue('trip-queue') private readonly tripQueue: Queue
@@ -75,7 +79,7 @@ export class TripSheetService {
             if (existingTripSheet) {
                 // console.log('this is existing trip sheet2', existingTripSheet);
 
-                response = standardResponse(
+                return standardResponse(
                     true,
                     'exisiting trip sheet found',
                     200,
@@ -119,7 +123,7 @@ export class TripSheetService {
                 const savedData = await this.tripSheetRepo.save(newTripSheet);
                 // console.log('in trip sheet created', savedData);
 
-                response = standardResponse(
+                return standardResponse(
                     true,
                     'exisiting trip sheet found',
                     200,
@@ -130,15 +134,13 @@ export class TripSheetService {
             }
         } catch (error) {
             console.log('-api- tripsheet/newTripsheetApi ', error.message);
-            response = standardResponse(false, error.message, 500, null, null, 'tripsheet/newTripsheetApi');
+            return standardResponse(false, error.message, 500, null, null, 'tripsheet/newTripsheetApi');
         }
-
-        return response;
     }
 
-    // update new tripsheet
-    async updateTripsheetApi(reqBody: any): Promise<any> {
-        console.log("reqbody in update tripsheetapi", reqBody);
+    // update new tripsheet for driver
+    async updateTripsheetByDriver(reqBody: any): Promise<any> {
+        console.log('reqbody in update tripsheetapi', reqBody);
         console.log('api calling---------');
 
         try {
@@ -173,6 +175,209 @@ export class TripSheetService {
         }
     }
 
+    async updateTripSheetByAdmin(reqBody: any): Promise<any> {
+        try{
+        const userEntity = await this.loggedInsUserService.getCurrentUser();
+        if (!userEntity) throw new NotFoundException('Logged user not found');
+        const { tripSheetId } = reqBody;
+        const tripData = await this.tripSheetRepo
+            .createQueryBuilder('tripSheet')
+            .where('tripSheet.id = :tripSheetId', { tripSheetId: tripSheetId })
+            .getOne();
+        if (!tripData) {
+            throw new NotFoundException('Trip sheet not found');
+        }
+        const fields = [
+            'id',
+            'tripDate',
+            'startTime',
+            'endTime',
+            'startOdometer',
+            'endOdometer',
+            'totalKm',
+            'sourceName',
+            'destinationName',
+            'documents',
+            'isActive',
+            'updatedAt'
+        ];
+        const updateObject: any = {};
+        fields.forEach((f) => {
+            if (reqBody[f] !== undefined) {
+                updateObject[f] = reqBody[f];
+            }
+        });
+
+        updateObject.id = reqBody.tripSheetId;
+        updateObject.isEdited = true;
+
+        // STEP 3: Save updated trip
+        const updatedTripSheet = await this.tripSheetRepo.save(updateObject);
+
+        const oldValues: Record<string, any> = {};
+        const newValues: Record<string, any> = {};
+
+        if (updatedTripSheet) {
+            fields.forEach((field) => {
+                oldValues[field] = tripData[field]; // old value from DB
+                newValues[field] = updatedTripSheet[field]; // new value from request
+            });
+        }
+        // console.log('old  values', oldValues);
+        // console.log(' new values', newValues);
+
+        const tripSheetHistoryUpdateObj: any = {};
+        if (tripData.isEdited) {
+            tripSheetHistoryUpdateObj.newValues = newValues;
+            tripSheetHistoryUpdateObj.changedBy = userEntity.id;
+            tripSheetHistoryUpdateObj.changedAt = new Date();
+        } else {
+            tripSheetHistoryUpdateObj.newValues = newValues;
+            tripSheetHistoryUpdateObj.oldValues = oldValues;
+            tripSheetHistoryUpdateObj.changedBy = userEntity.id;
+            tripSheetHistoryUpdateObj.changedAt = new Date();
+        }
+        // console.log('tripSheetHistoryUpdateObj', tripSheetHistoryUpdateObj);
+
+        const existingHistory = await this.tripSheetHistoryRepo.findOne({
+            where: { tripSheet: { id: tripSheetId } }
+        });
+
+        let updatedHistory;
+
+        if (existingHistory) {
+            // UPDATE existing row
+            updatedHistory = await this.tripSheetHistoryRepo.save({
+                id: existingHistory.id, // important!
+                ...tripSheetHistoryUpdateObj
+            });
+        } else {
+            // CREATE new row
+            updatedHistory = await this.tripSheetHistoryRepo.save({
+                tripSheet: { id: tripSheetId },
+                ...tripSheetHistoryUpdateObj
+            });
+        }
+
+        return standardResponse(true, 'Trip sheet updated successfully', 200, null, null, 'tripsheet/updateTripSheetByAdmin');
+    }catch(error){
+         console.log('-api- tripsheet/updateTripSheetByAdmin ', error.message);
+            return standardResponse(false, error.message, 500, null, null, 'tripsheet/updateTripSheetByAdmin');
+    }
+    }
+
+    // get trip sheet api for corporate admin
+    async getTripSheetForAdmin(reqBody: any): Promise<any> {
+        const userEntity = await this.loggedInsUserService.getCurrentUser();
+        // console.log("in get trip sheet api entity is ", userEntity);
+
+        if (!userEntity) {
+            throw new NotFoundException('Logged user not found');
+        }
+        const page = reqBody.page ? Number(reqBody.page) : 1;
+        const limit = reqBody.limit ? Number(reqBody.limit) : 10;
+        const skip = (page - 1) * limit;
+
+        const fromDate = reqBody.fromDate ? new Date(reqBody.fromDate) : null;
+        const toDate = reqBody.toDate ? new Date(reqBody.toDate) : null;
+        console.log('reqBody', reqBody, userEntity?.id, userEntity?.branch?.id);
+
+        const qb = this.tripSheetRepo
+            .createQueryBuilder('tripSheet')
+            .leftJoinAndSelect('tripSheet.corporate', 'corporate')
+            .leftJoinAndSelect('tripSheet.branch', 'branch')
+            .leftJoinAndSelect('tripSheet.vehicle', 'vehicle')
+            .leftJoinAndSelect('tripSheet.driver', 'driver')
+            .where('branch.id = :branchId', { branchId: userEntity?.branch?.id })
+            .andWhere('tripSheet.isActive = TRUE');
+
+        if (fromDate && toDate) {
+            qb.andWhere('tripSheet.createdAt >= :from', { from: fromDate }).andWhere('tripSheet.createdAt <= :to', {
+                to: toDate
+            });
+        } else if (fromDate) {
+            qb.andWhere('tripSheet.createdAt >= :from', { from: fromDate });
+        } else if (toDate) {
+            qb.andWhere('tripSheet.createdAt <= :to', { to: toDate });
+        }
+
+        qb.orderBy('tripSheet.id', 'DESC')
+            .skip(skip)
+            .take(limit)
+            .select([
+                'tripSheet',
+                'corporate.id',
+                'corporate.corporateCode',
+                'corporate.corporateName',
+                'branch.id',
+                'branch.branchCode',
+                'branch.name',
+                'vehicle.id',
+                'vehicle.vehicleNumber',
+                'vehicle.vehicleName',
+                'driver.id',
+                'driver.name',
+                'driver.mobileNumber'
+            ]);
+
+        const [tripSheets, total] = await qb.getManyAndCount();
+
+        if (!tripSheets || tripSheets.length === 0) {
+            return standardResponse(false, 'no trip sheet found', 404, null, null, 'tripsheet/getTripSheetForAdmin');
+        }
+
+        const tripIds = tripSheets.map((t) => t.id);
+        const historyRows = await this.tripSheetHistoryRepo
+            .createQueryBuilder('history')
+            .leftJoinAndSelect('history.changedBy', 'changedBy')
+            .leftJoinAndSelect('history.tripSheet', 'ts')
+            .where('history.tripSheet IN (:...tripIds)', { tripIds })
+            .orderBy('history.id', 'DESC')
+            .select([
+                'history.oldValues',
+                'history.newValues',
+                'changedBy.id',
+                'changedBy.userCode',
+                'changedBy.firstName',
+                'ts.id'
+            ])
+            .getMany();
+
+        // Map history to each trip
+        const historyMap: Record<number, any[]> = {};
+        historyRows.forEach((h) => {
+            const tsId = h.tripSheet?.id; // <-- correct way
+            if (!tsId) return;
+
+            if (!historyMap[tsId]) historyMap[tsId] = [];
+            historyMap[tsId].push(h);
+        });
+
+        // Attach edits to each trip sheet
+        const finalData = tripSheets.map((ts) => ({
+            ...ts,
+            edits: historyMap[ts.id] ?? []
+        }));
+
+        return standardResponse(
+            true,
+            'Trip sheets fetched successfully',
+            200,
+            {
+                items: finalData,
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+                filtersUsed: {
+                    fromDate: fromDate || null,
+                    toDate: toDate || null
+                }
+            },
+            null,
+            'tripsheet/getTripSheetForAdmin'
+        );
+    }
     // ⬆ Get or Create Trip Sheet
     async getTripSheetByMobile(reqBody: any) {
         try {

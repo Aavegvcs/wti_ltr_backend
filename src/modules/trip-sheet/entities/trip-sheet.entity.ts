@@ -109,6 +109,9 @@ export class TripSheet {
     @Column({ name: 'is_active', type: 'boolean', default: true })
     isActive: boolean;
 
+    @Column({ name: 'is_edited', type: 'boolean', default: false })
+    isEdited: boolean;
+
     @ManyToOne(() => User)
     @JoinColumn({ name: 'created_by' })
     createdBy: User;
