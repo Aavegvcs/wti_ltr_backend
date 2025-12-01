@@ -9,6 +9,8 @@ import { TripSheetStatus } from './entities/trip-sheet-status.entity';
 import { TripSheetStatusEnum } from 'src/utils/app.utils';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class TripSheetService {
@@ -25,7 +27,8 @@ export class TripSheetService {
         @InjectRepository(CvdMapping)
         private readonly cvdMappingRepo: Repository<CvdMapping>,
 
-        private readonly loggedInsUserService: LoggedInsUserService
+        private readonly loggedInsUserService: LoggedInsUserService,
+        @InjectQueue('trip-queue') private readonly tripQueue: Queue
     ) {}
 
     // create new tripsheet
@@ -133,6 +136,42 @@ export class TripSheetService {
         return response;
     }
 
+    // update new tripsheet
+    async updateTripsheetApi(reqBody: any): Promise<any> {
+        console.log("reqbody in update tripsheetapi", reqBody);
+        console.log('api calling---------');
+
+        try {
+            const { tripSheetId, ...updates } = reqBody;
+
+            if (!tripSheetId) {
+                throw new BadRequestException('tripSheetId is required');
+            }
+            // console.log("here is ...update", updates);
+
+            // Remove undefined/null fields
+            const cleanData = Object.fromEntries(
+                Object.entries(updates).filter(([_, v]) => v !== undefined && v !== null)
+            );
+            // console.log("here is clean data", cleanData);
+
+            // Push to Redis queue (Bull/BullMQ)
+            await this.tripQueue.add(
+                'updateTrip',
+                { tripSheetId, updates: cleanData, timestamp: Date.now() },
+                {
+                    jobId: `trip-${tripSheetId}`,
+                    removeOnComplete: true,
+                    removeOnFail: true
+                }
+            );
+
+            return standardResponse(true, 'data queued for update', 201, null, null, 'tripsheet/updateTripsheetApi');
+        } catch (error) {
+            console.log('error in catch block -api- tripsheet/updateTripsheetApi ', error.message);
+            return standardResponse(false, error.message, 500, null, null, 'tripsheet/updateTripsheetApi');
+        }
+    }
 
     // ⬆ Get or Create Trip Sheet
     async getTripSheetByMobile(reqBody: any) {

@@ -10,6 +10,8 @@ import { TripSheet } from './entities/trip-sheet.entity';
 import { TripSheetStatus } from './entities/trip-sheet-status.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
+import { TripWorker } from './trip-sheet-worker.processor';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
     imports: [
@@ -21,10 +23,11 @@ import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
             CvdMapping
         ]),
          forwardRef(() => UserModule),
-         forwardRef(() => AuthModule)
+         forwardRef(() => AuthModule),
+          BullModule.registerQueue({ name: 'trip-queue' })
     ],
     controllers: [TripSheetController],
-    providers: [TripSheetService, LoggedInsUserService],
+    providers: [TripSheetService, LoggedInsUserService, TripWorker],
     exports: [TripSheetService]
 })
 export class TripSheetModule {}
