@@ -17,7 +17,22 @@ export class TripSheetController {
     @Patch('updateTripsheetApi')
     @ApiOperation({ summary: 'Get or udpate trip sheet by driver mobile & date' })
     async updateTripsheetApi(@Body() body: any) {
-        return this.tripSheetService.updateTripsheetApi(body);
+        return this.tripSheetService.updateTripsheetByDriver(body);
+    }
+    @UseGuards(JwtAuthGuard)
+    @Patch('updateTripSheetByAdmin')
+    @ApiOperation({ summary: 'Get or udpate trip sheet by driver mobile & date' })
+    async updateTripSheetByAdmin(@Body() body: any) {
+        // console.log("in controller ----------", body);
+
+        return this.tripSheetService.updateTripSheetByAdmin(body);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Post('getTripSheetForAdmin')
+    @ApiOperation({ summary: 'Get trip sheet for corporate admin' })
+    async getTripSheetForAdmin(@Body() body: any) {
+        return this.tripSheetService.getTripSheetForAdmin(body);
     }
     @Post('get-or-create')
     @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })
