@@ -247,8 +247,9 @@ export class CvdMappingService {
     // ➤ LIST ALL MAPPINGS
     async listMappings() {
         const data = await this.cvdRepo.find({
-            relations: ['corporate', 'vehicle', 'driver', 'createdBy', 'updatedBy']
+            relations: ['corporate', 'branch', 'vehicle', 'driver', 'createdBy', 'updatedBy']
         });
+        console.log("in list api-------",data);
         return standardResponse(true, 'List fetched', 200, data);
     }
 
@@ -256,7 +257,7 @@ export class CvdMappingService {
     async getByCorporate(id: number) {
         const data = await this.cvdRepo.find({
             where: { corporate: { id } },
-            relations: ['corporate', 'vehicle', 'driver']
+            relations: ['corporate','branch',  'vehicle', 'driver']
         });
         return standardResponse(true, 'Data fetched', 200, data);
     }
@@ -265,7 +266,7 @@ export class CvdMappingService {
     async getByVehicle(id: number) {
         const data = await this.cvdRepo.find({
             where: { vehicle: { id } },
-            relations: ['corporate', 'vehicle', 'driver']
+            relations: ['corporate','branch',  'vehicle', 'driver']
         });
         return standardResponse(true, 'Data fetched', 200, data);
     }
@@ -274,7 +275,7 @@ export class CvdMappingService {
     async getByDriver(id: number) {
         const data = await this.cvdRepo.find({
             where: { driver: { id } },
-            relations: ['corporate', 'vehicle', 'driver']
+            relations: ['corporate','branch',  'vehicle', 'driver']
         });
         return standardResponse(true, 'Data fetched', 200, data);
     }
