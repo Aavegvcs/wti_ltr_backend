@@ -7,7 +7,6 @@ import { User } from '@modules/user/user.entity';
 import { TripSheetController } from './trip-sheet.controller';
 import { TripSheetService } from './trip-sheet.service';
 import { TripSheet } from './entities/trip-sheet.entity';
-import { TripSheetStatus } from './entities/trip-sheet-status.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 import { TripWorker } from './trip-sheet-worker.processor';
@@ -18,7 +17,6 @@ import { TripSheetHistory } from './entities/trip-sheet-history.entity';
     imports: [
         TypeOrmModule.forFeature([
             User,
-            TripSheetStatus,
             TripSheet,
             Driver,
             CvdMapping,

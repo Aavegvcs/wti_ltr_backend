@@ -96,7 +96,7 @@ export class CvdMapping {
     @JoinColumn({ name: 'vehicle_id' })
     vehicle: Vehicle;
 
-     @Index('idx_driver_id_in_cvd', {unique:true}) 
+    @Index('idx_driver_id_in_cvd', {unique:true}) 
     @ManyToOne(() => Driver, d => d.cvdMapping, { nullable: false })
     @JoinColumn({ name: 'driver_id' })
     driver: Driver;

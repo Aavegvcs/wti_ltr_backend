@@ -1,31 +1,32 @@
+import { Corporate } from '@modules/company/entities/corporate.entity';
 import { User } from '@modules/user/user.entity';
 import {
     Column,
     CreateDateColumn,
     DeleteDateColumn,
     Entity,
+    JoinColumn,
+    ManyToOne,
     OneToMany,
     OneToOne,
     PrimaryGeneratedColumn,
     UpdateDateColumn
 } from 'typeorm';
-import { CorporateRoles } from './corporate-role.entity';
-@Entity({ name: 'role' })
-export class Role {
+import { Role } from './role.entity';
+@Entity({ name: 'corporate_roles' })
+export class CorporateRoles {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    roleName: string;
+    @ManyToOne(() => Corporate, (corporate) => corporate.corporateRole)
+    @JoinColumn({ name: 'corporate_id' })
+    corporate: Corporate;
+
+    @ManyToOne(() => Role, (role) => role.corporateRole)
+    @JoinColumn({ name: 'role_id' })
+    role: Role;
 
     /*---------------------------------------RoleFeatureAction-Relation-------------------------------------------------*/
-
-    @OneToMany(() => User, (user) => user.userRole)
-    users: User[];
-
-    @OneToMany(() => CorporateRoles, (data) => data.role,)
-    corporateRole: CorporateRoles[];
-
     @Column({ name: 'description', nullable: true })
     description: string;
 

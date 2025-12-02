@@ -291,15 +291,9 @@ export enum Roles {
 export enum RoleId {
     'superadmin' = 1,
     'admin' = 2,
-    'client' = 3,
-    'insuranceAgent' = 4,
-    'dealer' = 5,
-    'staff' = 6,
-    'teleCaller' = 7,
-    'stateHead' = 8,
-    'branchManager' = 9,
-    'insuranceManager' = 10,
-    'productHead' = 11
+    'operation' = 3,
+    'corporateAdmin' = 4,
+    'corporateStaff' = 5,
 }
 export type RoleType = keyof typeof Roles;
 export const rolesArr = [Roles.admin, Roles.operation];
@@ -349,12 +343,12 @@ export const featuresArr = [
     Features.client
 ];
 
-export const CLIENT_STATUS = {
-    ACTIVE: 'active',
-    IN_ACTIVE: 'in-active',
-    PENDING: 'pending',
-    INVITATION_SENT: 'invitation sent'
-};
+// export const CLIENT_STATUS = {
+//     ACTIVE: 'active',
+//     IN_ACTIVE: 'in-active',
+//     PENDING: 'pending',
+//     INVITATION_SENT: 'invitation sent'
+// };
 
 export const STAFF_STATUS = {
     ACTIVE: 'active',
@@ -363,42 +357,6 @@ export const STAFF_STATUS = {
     INVITATION_SENT: 'invitation sent'
 };
 
-export const TICKET_EVENTS = {
-    GENERATED: 'GENERATED',
-    GENERATED_AND_ASSIGNED: 'GENERATED-AND-ASSIGNED',
-    ASSIGNED: 'ASSIGNED',
-    RE_ASSIGNED: 'RE-ASSIGNED',
-    MODIFIED: 'MODIFIED',
-    MADE_AWAITED: 'MADE-AWAITED',
-    REMOVED_FROM_AWAITED: 'REMOVED-FROM-AWAITED',
-    RE_ASSIGNED_AND_MODIFIED: 'RE-ASSIGNED-AND-MODIFIED',
-    COMPLETED: 'COMPLETED',
-    DELETED: 'DELETED',
-    CANCELED: 'CANCELED',
-    MARKED_NO_SHOW: 'NO-SHOW'
-};
-// Define a union type for the event types
-export type TicketEvent = (typeof TICKET_EVENTS)[keyof typeof TICKET_EVENTS];
-
-export const APPOINTMENT_REQUEST_STATUS = {
-    UN_ASSIGNED: 'UN-ASSIGNED',
-    AWAITING: 'AWAITING',
-    PENDING: 'PENDING',
-    COMPLETED: 'COMPLETED',
-    DELETED: 'DELETED',
-    CANCELED: 'CANCELED',
-    MARKED_NO_SHOW: 'NO-SHOW'
-};
-
-export enum APPOINTMENT_STATUS {
-    'PENDING' = 'PENDING',
-    'SAVED' = 'SAVED',
-    'COMPLETED' = 'COMPLETE',
-    'DELETED' = 'DELETED',
-    'CANCELED' = 'CANCELED',
-    'APPROVED' = 'APPROVED',
-    'REJECTED' = 'REJECTED'
-}
 
 export const fillOrReplaceObject = (target: any, source: any) => {
     for (const key of Object.keys(source)) {
@@ -590,28 +548,6 @@ export const addFilters = <T>(query: SelectQueryBuilder<T>, filterObject: Filter
     });
 };
 
-export const INSURANCE_TYPES = {
-    PRIMARY: 'primary',
-    SECONDARY: 'secondary',
-    TERTIARY: 'tertiary'
-};
-export enum Insurance_Type {
-    Health = 'HEALTH',
-    Life = 'LIFE',
-    Motor = 'MOTOR',
-    Other = 'OTHER'
-}
-export enum Policy_Status {
-    Active = 'ACTIVE',
-    Lapsed = 'LAPSED',
-    Expired = 'EXPIRED',
-    Cancelled = 'CANCELLED'
-}
-
-export const PAYMENT_TYPES = {
-    CASH: 'cash',
-    INSURANCE: 'insurance'
-};
 
 export function deepEqual(obj1: any, obj2: any) {
     if (obj1 === obj2) return true;
@@ -649,78 +585,6 @@ export function deepEqual(obj1: any, obj2: any) {
 
 export const THERAPIST_APPROVED = 'approved';
 
-// High-level ticket statuses
-export enum Ticket_Status {
-    OPEN = 'OPEN', // Ticket is newly created and active
-    IN_PROGRESS = 'IN_PROGRESS', // Ticket is being worked on
-    ON_HOLD = 'ON_HOLD', // Ticket is paused (e.g., waiting for customer input)
-    RESOLVED = 'RESOLVED', // Ticket issue is resolved but not yet closed
-    CLOSED = 'CLOSED', // Ticket is fully completed and closed
-    CANCELLED = 'CANCELLED' // Ticket is cancelled
-}
-// Specific steps in the ticket workflow
-export enum Current_Step {
-    INITIAL_REVIEW = 'INITIAL_REVIEW', // Ticket is under initial review
-    // DOCUMENT_COLLECTION = 'DOCUMENT_COLLECTION', // Collecting documents from the customer
-    DOCUMENT_COLLECTED = 'DOCUMENT_COLLECTED', // Collecting documents from the customer
-    // DOCUMENT_VERIFICATION = 'DOCUMENT_VERIFICATION', // Verifying the submitted documents
-    // ASSIGNED_TO_TELECALLER = 'ASSIGNED_TO_TELECALLER', // Assigned to a telecaller for follow-up
-    QUOTATION_GENERATED = 'QUOTATION_GENERATED', // Generating insurance quotation
-    QUOTATION_SENT = 'QUOTATION_SENT', // Quotation sent to the customer
-    QUOTATION_REVIEWED = 'QUOTATION_REVIEWED', // Reviewing the quotation
-
-    SUBMITTED_FOR_REVISION = 'SUBMITTED_FOR_REVISION', // Submitted for revision by the customer
-    REVISED_AND_UPDATE = 'REVISED_AND_UPDATE', // Revision required by the customer
-    CUSTOMER_APPROVED = 'CUSTOMER_APPROVED', // Waiting for customer approval of quotation
-
-    PAYMENT_LINK_GENERATED = 'PAYMENT_LINK_GENERATED', // Waiting for payment from the customer
-    // PAYMENT_PROCESSING = 'PAYMENT_PROCESSING', // Processing the payment
-    PAYMENT_DENIED = 'PAYMENT_DENIED', // Payment denied by the customer//
-    PAYMENT_CONFIRMED = 'PAYMENT_CONFIRMED', // Payment successfully completed
-
-    POLICY_ISSUED = 'POLICY_ISSUED', // Issuing the insurance policy
-    POLICY_RECEIVED = 'POLICY_RECEIVED', // Reviewing the issued policy
-    POLICY_DELIVERED = 'POLICY_DELIVERED', // Policy delivered to the customer
-    // FOLLOW_UP = 'FOLLOW_UP' // Post-issuance follow-up with the customer
-    CLOSED = 'CLOSED'
-}
-export enum Quotation_Status {
-    QUOTATION_GENERATED = 'QUOTATION_GENERATED', // Generating insurance quotation
-    QUOTATION_SENT = 'QUOTATION_SENT', // Quotation sent to the customer
-    SUBMITTED_FOR_REVISION = 'SUBMITTED_FOR_REVISION', // Submitted for revision by the customer
-    REVISED_AND_UPDATE = 'REVISED_AND_UPDATE', // Revision required by the customer
-    CUSTOMER_APPROVED = 'CUSTOMER_APPROVED', // Waiting for customer approval of quotation
-    EXPIRED = 'EXPIRED' // Expired
-}
-
-// Events for logging ticket actions
-export enum TICKET_LOG_EVENTS {
-    TICKET_CREATED = 'CREATED',
-    TICKET_CREATED_AND_ASSIGNED = 'CREATED_AND_ASSIGNED',
-    TICKET_ASSIGNED = 'ASSIGNED',
-    TICKET_REASSIGNED = 'REASSIGNED',
-    TICKET_UPDATED = 'UPDATED',
-    TICKET_CLOSED = 'CLOSED',
-    TICKET_CANCELLED = 'CANCELLED',
-    TICKET_COMMENTED = 'COMMENTED',
-    TICKET_ESCALATED = 'ESCALATED',
-    TICKET_DELETED = 'DELETED',
-    TICKET_STATUS_CHANGED = 'STATUS_CHANGED', // Logs changes to Ticket_Status
-    TICKET_STEP_CHANGED = 'STEP_CHANGED' // Logs changes to Current_Step
-}
-
-export enum Notification_Type {
-    'new_ticket' = 'New_Ticket',
-    'renewal_reminder' = 'Renewal_Reminder',
-    'payment_reminder' = 'Payment_Reminder',
-    'claim_update' = 'Claim_Update'
-}
-
-export enum Insurance_Product_Status {
-    ACTIVE = 'ACTIVE',
-    CANCELED = 'CANCELED',
-    EXPIRED = 'EXPIRED'
-}
 
 export enum Gender {
     Male = 'male',
@@ -728,125 +592,9 @@ export enum Gender {
     Other = 'other'
 }
 
-export enum Ticket_Type {
-    FRESH = 'FRESH',
-    PORT = 'PORT',
-    RENEWAL = 'RENEWAL'
-}
-
-export enum Policy_Holerder_Type {
-    INDIVIDUAL = 'INDIVIDUAL',
-    FAMILY = 'FAMILY'
-}
-
-export enum Coverage_Type {
-    FULL = 'FULL',
-    THIRD_PARTY = 'THIRD_PARTY',
-    B2B = 'B2B'
-}
-
-export enum Family_Member_Type {
-    SELF = 'SELF',
-    SPOUSE = 'SPOUSE',
-    SON = 'SON',
-    DAUGHTER = 'DAUGHTER',
-    MOTHER = 'MOTHER',
-    FATHER = 'FATHER',
-    BROTHER = 'BROTHER',
-    SISTER = 'SISTER',
-    GRANDPARENT = 'GRANDPARENT',
-    OTHER = 'OTHER'
-}
-
-export enum Insurance_Purpose {
-    TERM = 'TERM',
-    SAVINGS = 'SAVINGS',
-    ULIP = 'ULIP',
-    ENDOWMENT = 'ENDOWMENT',
-    Protection = 'PROTECTION',
-    GuaranteedReturns = 'GUARANTEED_RETURNS'
-}
-export enum Employment_Type {
-    BUSINESS = 'BUSINESS',
-    SALARIED = 'SALARIED'
-}
-
-export enum Vehicle_Type {
-    CAR = 'CAR',
-    BIKE = 'BIKE',
-    SCOOTER = 'SCOOTER',
-    AUTO = 'AUTO',
-    BUS = 'BUS',
-    OTHERS = 'OTHERS'
-}
-
-export enum Vehicle_Category {
-  TwoWheeler = 'TWO_WHEELER',
-  PrivateCar = 'PRIVATE_CAR',
-  GoodsCarryingVehicle = 'GOODS_CARRYING_VEHICLE',
-  PassengerCarryingVehicle = 'PASSENGER_CARRYING_VEHICLE',
-  Miscellaneous = 'MISCELLANEOUS',
-}
-
-
-export enum Client_Type {
-    NEW_CLIENT = 'NEW_CLIENT',
-    EXISTING_CLIENT = 'EXISTING_CLIENT',
-    PORT_CLIENT = 'PORT_CLIENT'
-}
-
-export enum Pre_Existing_Diseases {
-    NONE = 'NONE',
-    ASTHMA = 'ASTHMA',
-    BP = 'BP',
-    CHOLESTEROL = 'CHOLESTEROL',
-    DIABETES_OBESITY = 'DIABETES_OBESITY',
-    OTHERS = 'OTHERS'
-}
-
 export function generateRandomPassword(length = 8): string {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     return Array.from({ length }, () => charset[Math.floor(Math.random() * charset.length)]).join('');
-}
-
-export interface TicketResponse {
-    status: string;
-    message: string;
-    data: any;
-}
-
-export interface MedicalDetails {
-    height: number | null;
-    weight: number | null;
-    preExistDiseases: string;
-    othersDiseases: string | null;
-    medication: string | null;
-    bloodGroup: string | null;
-    isPastSurgery: boolean;
-    isChronicCondition: boolean;
-    dischargeSummary: string;
-    diagnosticReport: string;
-    isSmoker: boolean;
-    isDrinker: boolean;
-    documents: any | null;
-    updatedBy: number | null;
-    updatedAt: Date | null;
-}
-
-// function for quote id
-
-export function generateQuoteId(ticketId: number): string {
-    const prefix = 'QUOT';
-    const randomCharsLength = 4;
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-    let randomChars = '';
-    for (let i = 0; i < randomCharsLength; i++) {
-        const randomIndex = randomInt(0, charset.length);
-        randomChars += charset[randomIndex];
-    }
-
-    return `${prefix}${ticketId}${randomChars}`;
 }
 
 export const formatToCamelCase = (
