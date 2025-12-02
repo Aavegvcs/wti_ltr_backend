@@ -1,5 +1,6 @@
 import { Branch } from '@modules/branch/entities/branch.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
+import { CorporateRoles } from '@modules/role/entities/corporate-role.entity';
 import { User } from '@modules/user/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 import { Country } from 'src/modules/countries/entities/country.entity';
@@ -160,4 +161,7 @@ export class Corporate extends BaseEntity {
 
     @OneToMany(() => CvdMapping, (data) => data.corporate, { nullable: true })
     cvdMapping: CvdMapping[];
+
+     @OneToMany(() => CorporateRoles, (data) => data.corporate, { nullable: true })
+    corporateRole: CorporateRoles[];
 }

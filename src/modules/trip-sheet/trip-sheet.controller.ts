@@ -21,11 +21,20 @@ export class TripSheetController {
     }
     @UseGuards(JwtAuthGuard)
     @Patch('updateTripSheetByAdmin')
-    @ApiOperation({ summary: 'Get or udpate trip sheet by driver mobile & date' })
+    @ApiOperation({ summary: 'Get or udpate trip sheet by admin' })
     async updateTripSheetByAdmin(@Body() body: any) {
         // console.log("in controller ----------", body);
 
         return this.tripSheetService.updateTripSheetByAdmin(body);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Patch('updateStatusByAdmin')
+    @ApiOperation({ summary: 'udpate trip status by admin' })
+    async updateStatusByAdmin(@Body() body: any) {
+        // console.log("in controller ----------", body);
+
+        return this.tripSheetService.updateStatusByAdmin(body);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -34,6 +43,14 @@ export class TripSheetController {
     async getTripSheetForAdmin(@Body() body: any) {
         return this.tripSheetService.getTripSheetForAdmin(body);
     }
+    @UseGuards(JwtAuthGuard)
+    @Post('getTripSheetForOperations')
+    @ApiOperation({ summary: 'Get trip sheet for corporate admin' })
+    async getTripSheetForOperations(@Body() body: any) {
+
+        return this.tripSheetService.getTripSheetForOperations(body);
+    }
+
     @Post('get-or-create')
     @ApiOperation({ summary: 'Get or create trip sheet by driver mobile & date' })
     async getOrCreateTripSheet(@Body() body: any) {
