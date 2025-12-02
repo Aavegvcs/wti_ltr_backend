@@ -5,7 +5,6 @@ import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 import { standardResponse } from 'src/utils/helper/response.helper';
 import { TripSheet } from './entities/trip-sheet.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
-import { TripSheetStatus } from './entities/trip-sheet-status.entity';
 import { TripSheetStatusEnum } from 'src/utils/app.utils';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
@@ -22,8 +21,8 @@ export class TripSheetService {
         @InjectRepository(Driver)
         private readonly driverRepo: Repository<Driver>,
 
-        @InjectRepository(TripSheetStatus)
-        private readonly statusRepo: Repository<TripSheetStatus>,
+        // @InjectRepository(TripSheetStatus)
+        // private readonly statusRepo: Repository<TripSheetStatus>,
 
         @InjectRepository(CvdMapping)
         private readonly cvdMappingRepo: Repository<CvdMapping>,
@@ -579,7 +578,7 @@ export class TripSheetService {
             }
 
             // Create NEW Trip Sheet
-            const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
+            // const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
 
             const newTrip = this.tripSheetRepo.create({
                 driver,
@@ -608,7 +607,7 @@ export class TripSheetService {
 
     // ⬆ Submit Trip Sheet → Status = SUBMITTED
     async submitTripSheet(id: number) {
-        const submitted = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.SUBMITTED } });
+        // const submitted = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.SUBMITTED } });
 
         await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.SUBMITTED });
 
@@ -617,7 +616,7 @@ export class TripSheetService {
 
     // ⬆ Close Trip Sheet → Status = CLOSED
     async closeTripSheet(id: number) {
-        const closed = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.APPROVED } });
+        // const closed = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.APPROVED } });
 
         await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.APPROVED });
 
@@ -626,7 +625,7 @@ export class TripSheetService {
 
     // ⬆ Reopen Trip Sheet → Status = OPEN
     async reopenTripSheet(id: number) {
-        const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
+        // const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
 
         await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.CREATED });
 

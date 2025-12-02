@@ -13,7 +13,6 @@ import { User } from '@modules/user/user.entity';
 import { Corporate } from '@modules/company/entities/corporate.entity';
 import { Vehicle } from '@modules/vehicle/entities/vehicle.entity';
 import { Driver } from '@modules/driver/entities/driver.entity';
-import { TripSheetStatus } from './trip-sheet-status.entity';
 import { Branch } from '@modules/branch/entities/branch.entity';
 import { TripSheetStatusEnum } from 'src/utils/app.utils';
 
@@ -27,7 +26,7 @@ export class TripSheet {
     corporate: Corporate;
 
     @ManyToOne(() => Branch)
-    @JoinColumn({ name: "branch_id" })
+    @JoinColumn({ name: 'branch_id' })
     branch: Branch;
 
     @ManyToOne(() => Vehicle)
@@ -38,12 +37,19 @@ export class TripSheet {
     // @JoinColumn({ name: 'driver_id' })
     // driver: Driver;
 
-    @Index('idx_driver_id_in_trip_sheet')     // <-- Add INDEX here
+    @Index('idx_driver_id_in_trip_sheet') // <-- Add INDEX here
     @ManyToOne(() => Driver, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'driver_id' })
     driver: Driver;
 
-    @Column({ type: 'int', name: 'trip_status' })
+    // @Column({ type: 'int', name: 'trip_status' })
+    // tripStatus: TripSheetStatusEnum;
+    @Column({
+        name: 'trip_status',
+        type: 'enum',
+        enum: TripSheetStatusEnum,
+        default: TripSheetStatusEnum.CREATED
+    })
     tripStatus: TripSheetStatusEnum;
 
     @Column({ type: 'datetime', name: 'trip_date', nullable: true })
@@ -58,11 +64,8 @@ export class TripSheet {
     @Column({ type: 'int', name: 'end_odometer', nullable: true })
     endOdometer: number;
 
-
     @Column({ type: 'time', name: 'end_time', nullable: true })
     endTime: string;
-
-   
 
     @Column({ type: 'decimal', name: 'total_km', precision: 10, scale: 2, nullable: true })
     totalKm: number;
