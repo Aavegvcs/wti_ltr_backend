@@ -46,8 +46,7 @@ export class TripSheet {
     // tripStatus: TripSheetStatusEnum;
     @Column({
         name: 'trip_status',
-        type: 'enum',
-        enum: TripSheetStatusEnum,
+        type: 'int',
         default: TripSheetStatusEnum.CREATED
     })
     tripStatus: TripSheetStatusEnum;
