@@ -39,7 +39,7 @@ export class TripSheetService {
         let response = null;
         try {
             const driverMobile = reqBody.driverMobile;
-            console.log("req boayd", reqBody)
+            console.log('req boayd', reqBody);
             const existingDriver = await this.driverRepo.findOne({ where: { mobileNumber: driverMobile } });
             if (!existingDriver) {
                 throw new UnauthorizedException('Driver not found');
@@ -74,7 +74,7 @@ export class TripSheetService {
                 ])
                 .getOne();
 
-             console.log('this is existing trip sheet1', existingTripSheet);
+            console.log('this is existing trip sheet1', existingTripSheet);
 
             if (existingTripSheet) {
                 // console.log('this is existing trip sheet2', existingTripSheet);
@@ -108,8 +108,17 @@ export class TripSheetService {
                         'vehicle.vehicleName'
                     ])
                     .getOne();
-                // console.log('this is cvd mapping details', cvdMappingDetails);
-
+                 console.log('this is cvd mapping details', cvdMappingDetails);
+                    if(!cvdMappingDetails){
+                         return standardResponse(
+                    false,
+                    'Driver is not mapped with corporate',
+                    404,
+                    null,
+                    null,
+                    'tripsheet/newTripsheetApi'
+                );
+                    }
                 // create  new trip sheet with default null
                 const currentDate = new Date();
                 const newTripSheet = new TripSheet();
@@ -321,7 +330,12 @@ export class TripSheetService {
         const skip = (page - 1) * limit;
 
         const fromDate = reqBody.fromDate ? new Date(reqBody.fromDate) : null;
-        const toDate = reqBody.toDate ? new Date(reqBody.toDate) : null;
+        let toDate = reqBody.toDate ? new Date(reqBody.toDate) : null;
+
+        if (toDate) {
+            toDate.setHours(23, 59, 59, 999);
+        }
+
         console.log('reqBody', reqBody, userEntity?.id, userEntity?.branch?.id);
 
         const qb = this.tripSheetRepo
@@ -342,7 +356,6 @@ export class TripSheetService {
         } else if (toDate) {
             qb.andWhere('tripSheet.createdAt <= :to', { to: toDate });
         }
-
         qb.orderBy('tripSheet.id', 'DESC')
             .skip(skip)
             .take(limit)
@@ -363,6 +376,7 @@ export class TripSheetService {
             ]);
 
         const [tripSheets, total] = await qb.getManyAndCount();
+        console.log('trip sheet log', tripSheets);
 
         if (!tripSheets || tripSheets.length === 0) {
             return standardResponse(false, 'no trip sheet found', 404, null, null, 'tripsheet/getTripSheetForAdmin');
@@ -439,7 +453,11 @@ export class TripSheetService {
             const iskip = (page - 1) * limit;
 
             const ifromDate = fromDate ? new Date(fromDate) : null;
-            const itoDate = toDate ? new Date(toDate) : null;
+            let itoDate = toDate ? new Date(toDate) : null;
+
+            if (itoDate) {
+                itoDate.setHours(23, 59, 59, 999);
+            }
 
             const qb = this.tripSheetRepo
                 .createQueryBuilder('tripSheet')
