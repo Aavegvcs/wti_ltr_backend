@@ -47,15 +47,7 @@ async uploadFile(
     console.log("document type is heere", documentType, file);
     
     const validDocumentTypes = [
-      'ticket-document',
-      'insurance-user',
-      'user-medical',
-      'insurance-dependent',
-      'dependent-medical',
-      'insured-person',
-      'insured-medical',
-      'vehicle-document',
-      'claims'
+      'signature'
     ];
 
     if (!validDocumentTypes.includes(documentType)) {
@@ -95,72 +87,10 @@ async uploadFile(
     }
   }
 
-// async getFile(documentType: string, fileName: string, res: Response): Promise<void> {
-//     const validDocumentTypes = [
-//         'ticket-document',
-//         'insurance-user',
-//         'user-medical',
-//         'insurance-dependent',
-//         'dependent-medical',
-//         'insured-person',
-//         'insured-medical',
-//         'vehicle-document',
-//     ];
-
-//     if (!validDocumentTypes.includes(documentType)) {
-//         throw new NotFoundException('Invalid document type');
-//     }
-
-//     const s3Path = `${documentType}/${fileName}`;
-//     try {
-//         const command = new GetObjectCommand({
-//             Bucket: this.bucketName,
-//             Key: s3Path,
-//         });
-
-//         const { Body, ContentType } = await this.s3Client.send(command);
-//         if (!Body) {
-//             throw new NotFoundException('File not found');
-//         }
-
-//         const mimeType = ContentType || mime.lookup(fileName) || 'application/octet-stream';
-//         const previewableTypes = [
-//             'image/jpeg',
-//             'image/png',
-//             'image/gif',
-//             'image/bmp',
-//             'image/webp',
-//             'application/pdf',
-//             'text/plain',
-//             // Add other previewable MIME types as needed
-//         ];
-//         const disposition = previewableTypes.includes(mimeType) ? 'inline' : 'attachment';
-
-//         console.log('Content-Type from S3:', ContentType);
-//         console.log('Resolved MIME type:', mimeType);
-//         console.log('Content-Disposition:', disposition);
-
-//         res.setHeader('Content-Type', mimeType);
-//         res.setHeader('Content-Disposition', `${disposition}; filename="${fileName}"`);
-
-//         (Body as any).pipe(res);
-//     } catch (error: any) {
-//         this.logger.error(`Failed to stream file ${s3Path}: ${error.message}`);
-//         throw new NotFoundException(`File not found or inaccessible: ${error.message}`);
-//     }
-// }
 
 async getFile(documentType: string, fileName: string, res: Response): Promise<void> {
     const validDocumentTypes = [
-      'ticket-document',
-      'insurance-user',
-      'user-medical',
-      'insurance-dependent',
-      'dependent-medical',
-      'insured-person',
-      'insured-medical',
-      'vehicle-document',
-      'claims'
+      'signature'
     ];
 
     if (!validDocumentTypes.includes(documentType)) {
