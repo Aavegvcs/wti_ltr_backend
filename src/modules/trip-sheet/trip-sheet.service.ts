@@ -39,13 +39,14 @@ export class TripSheetService {
         let response = null;
         try {
             const driverMobile = reqBody.driverMobile;
+            console.log("req boayd", reqBody)
             const existingDriver = await this.driverRepo.findOne({ where: { mobileNumber: driverMobile } });
             if (!existingDriver) {
                 throw new UnauthorizedException('Driver not found');
             }
             // console.log('this is driver mobile number', existingDriver);
 
-            // console.log('existing driver id is here', existingDriver?.id);
+            //  console.log('existing driver id is here', existingDriver?.id);
             const existingTripSheet = await this.tripSheetRepo
                 .createQueryBuilder('tripSheet')
                 .leftJoinAndSelect('tripSheet.corporate', 'corporate')
@@ -73,7 +74,7 @@ export class TripSheetService {
                 ])
                 .getOne();
 
-            // console.log('this is existing trip sheet1', existingTripSheet);
+             console.log('this is existing trip sheet1', existingTripSheet);
 
             if (existingTripSheet) {
                 // console.log('this is existing trip sheet2', existingTripSheet);
