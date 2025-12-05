@@ -35,11 +35,11 @@ export class TripWorker {
 
             const finalData = { ...trip, ...updates };
 
-            if (finalData.startOdometer !== undefined && finalData.endOdometer !== undefined) {
-                if (finalData.startOdometer > finalData.endOdometer) return;
+            // if (finalData.startOdometer !== undefined && finalData.endOdometer !== undefined) {
+            //     if (finalData.startOdometer > finalData.endOdometer) return;
 
-                finalData.totalKm = finalData.endOdometer - finalData.startOdometer;
-            }
+            //     finalData.totalKm = finalData.endOdometer - finalData.startOdometer;
+            // }
              finalData.updatedAt = new Date();
             console.log('here is final data2', finalData);
             await this.tripSheetRepo.update({ id: tripSheetId }, finalData);

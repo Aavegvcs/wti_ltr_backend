@@ -37,6 +37,7 @@ export class TripSheetService {
     // create new tripsheet
     async newTripsheetApi(reqBody: any): Promise<any> {
         let response = null;
+        console.log('req body in service', reqBody);
         try {
             const driverMobile = reqBody.driverMobile;
             console.log('req boayd', reqBody);
@@ -465,9 +466,12 @@ export class TripSheetService {
                 .leftJoinAndSelect('tripSheet.branch', 'branch')
                 .leftJoinAndSelect('tripSheet.vehicle', 'vehicle')
                 .leftJoinAndSelect('tripSheet.driver', 'driver')
-                .where('corporate.id = :corporateId', { corporateId: corporateId })
-                .andWhere('tripSheet.isActive = TRUE');
-            if (branchId !== 0) {
+                .where('tripSheet.tripStatus=:tripStatus',{tripStatus:TripSheetStatusEnum.APPROVED})
+                .andWhere('tripSheet.isActive = TRUE')
+            if (corporateId !== 0) {
+                qb.andWhere('corporate.id = :corporateId', { corporateId });
+            }
+                if (branchId !== 0) {
                 qb.andWhere('branch.id = :branchId', { branchId });
             }
 
