@@ -336,14 +336,14 @@ export class AuthService {
         //     },
         //     relations: ['corporate']
         // });
-        
+        console.log("request body in login api service", reqBody);
         const detailedUser = await this.userRepository.findOne({
             where: {
                  email: reqBody.email
             },
             relations: ['userRole', 'corporate', 'state', 'branch']
         });
-
+console.log("detailedUser---", detailedUser);
         if (!detailedUser) throw new NotAcceptableException(['User not found']);
 
         if (detailedUser?.status === USER_STATUS.IN_ACTIVE) {

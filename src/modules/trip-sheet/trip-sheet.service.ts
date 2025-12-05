@@ -37,6 +37,7 @@ export class TripSheetService {
     // create new tripsheet
     async newTripsheetApi(reqBody: any): Promise<any> {
         let response = null;
+        console.log('req body in service', reqBody);
         try {
             const driverMobile = reqBody.driverMobile;
             console.log('req boayd', reqBody);
@@ -465,9 +466,12 @@ export class TripSheetService {
                 .leftJoinAndSelect('tripSheet.branch', 'branch')
                 .leftJoinAndSelect('tripSheet.vehicle', 'vehicle')
                 .leftJoinAndSelect('tripSheet.driver', 'driver')
-                .where('corporate.id = :corporateId', { corporateId: corporateId })
-                .andWhere('tripSheet.isActive = TRUE');
-            if (branchId !== 0) {
+                .where('tripSheet.tripStatus=:tripStatus',{tripStatus:TripSheetStatusEnum.APPROVED})
+                .andWhere('tripSheet.isActive = TRUE')
+            if (corporateId !== 0) {
+                qb.andWhere('corporate.id = :corporateId', { corporateId });
+            }
+                if (branchId !== 0) {
                 qb.andWhere('branch.id = :branchId', { branchId });
             }
 
@@ -570,94 +574,4 @@ export class TripSheetService {
         }
     }
 
-    // ⬆ Get or Create Trip Sheet
-    async getTripSheetByMobile(reqBody: any) {
-        try {
-            const { mobileNumber, tripDate } = reqBody;
-
-            const driver = await this.driverRepo.findOne({
-                where: { mobileNumber }
-            });
-
-            if (!driver) {
-                return standardResponse(false, 'Driver not found', 404);
-            }
-
-            // check if trip exists
-            const existing = await this.tripSheetRepo.findOne({
-                where: {
-                    driver: { id: driver.id },
-                    tripDate: tripDate
-                },
-                relations: ['status']
-            });
-
-            if (existing) {
-                return standardResponse(true, 'Trip sheet fetched', 200, existing);
-            }
-
-            // Create NEW Trip Sheet
-            // const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
-
-            const newTrip = this.tripSheetRepo.create({
-                driver,
-                tripDate: tripDate,
-                tripStatus: TripSheetStatusEnum.CREATED,
-                isActive: true
-            });
-
-            const saved = await this.tripSheetRepo.save(newTrip);
-
-            return standardResponse(true, 'New trip sheet created', 201, saved);
-        } catch (err) {
-            return standardResponse(false, err.message, 500);
-        }
-    }
-
-    // ⬆ Save Trip Sheet (Partial)
-    async saveTripSheet(id: number, body: any) {
-        const trip = await this.tripSheetRepo.findOne({ where: { id } });
-        if (!trip) return standardResponse(false, 'Trip not found', 404);
-
-        await this.tripSheetRepo.update(id, body);
-
-        return standardResponse(true, 'Trip sheet saved', 200);
-    }
-
-    // ⬆ Submit Trip Sheet → Status = SUBMITTED
-    async submitTripSheet(id: number) {
-        // const submitted = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.SUBMITTED } });
-
-        await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.SUBMITTED });
-
-        return standardResponse(true, 'Trip sheet submitted', 200);
-    }
-
-    // ⬆ Close Trip Sheet → Status = CLOSED
-    async closeTripSheet(id: number) {
-        // const closed = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.APPROVED } });
-
-        await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.APPROVED });
-
-        return standardResponse(true, 'Trip sheet closed', 200);
-    }
-
-    // ⬆ Reopen Trip Sheet → Status = OPEN
-    async reopenTripSheet(id: number) {
-        // const openStatus = await this.statusRepo.findOne({ where: { status: TripSheetStatusEnum.CREATED } });
-
-        await this.tripSheetRepo.update(id, { tripStatus: TripSheetStatusEnum.CREATED });
-
-        return standardResponse(true, 'Trip sheet reopened', 200);
-    }
-
-    // ⬆ List trip sheets for driver
-    async getTripsByDriver(driverId: number) {
-        const trips = await this.tripSheetRepo.find({
-            where: { driver: { id: driverId } },
-            relations: ['status']
-        });
-
-        return standardResponse(true, 'Trips fetched', 200, trips);
-    }
 }

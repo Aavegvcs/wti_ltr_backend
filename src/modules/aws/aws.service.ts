@@ -10,6 +10,7 @@ import * as https from 'https';
 const sharp = require('sharp');
 import * as mimeTypes from 'mime-types';
 import * as mime from 'mime';
+import { log } from 'console';
 
 @Injectable()
 export class AwsService {
@@ -80,6 +81,8 @@ async uploadFile(
             // console.log('res', res);
       const fileUrl = `${this.bucketUrl}/${s3Path}`;
       // this.logger.log(`Uploaded file: ${s3Path}`);
+      console.log(`Uploaded file URL: ${fileUrl}`);
+      console.log(`Uploaded file URL2: ${myFile}`);
       return { fileUploaded: true, name: myFile };
     } catch (error) {
       this.logger.error(`File upload failed: ${error.message}`);

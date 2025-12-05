@@ -33,7 +33,7 @@ export class DriverController {
     async createDriver(@Body() reqBody: any) {
         return this.driverService.createDriver(reqBody);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Get('list')
     @ApiOperation({ summary: 'Get all drivers' })
     async getDrivers(
@@ -45,13 +45,13 @@ export class DriverController {
     }
 
 
-
+    @UseGuards(JwtAuthGuard)
     @Patch('update/:id')
     @ApiOperation({ summary: 'Update driver details' })
     async updateDriver(@Param('id') id: number, @Body() reqBody: any) {
         return this.driverService.updateDriver(id, reqBody);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Delete('delete/:id')
     @ApiOperation({ summary: 'Delete driver (soft delete)' })
     async deleteDriver(@Param('id') id: number) {
@@ -63,10 +63,12 @@ export class DriverController {
     // async changeStatus(@Param('id') id: number, @Body() body: { isActive: boolean }) {
     //     return this.driverService.changeStatus(id, body.isActive);
     // }
+    @UseGuards(JwtAuthGuard)
     @Patch('change-status/:id')
     async changeStatus(@Param('id') id: string, @Body() body: { isActive: boolean }) {
         return this.driverService.changeStatus(Number(id), body.isActive);
     }
+    @UseGuards(JwtAuthGuard)
     @Get(':mobileNumber')
     @ApiOperation({ summary: 'Get driver by Mobile Number' })
     async getDriver(@Param('mobileNumber') mobileNumber: string) {
