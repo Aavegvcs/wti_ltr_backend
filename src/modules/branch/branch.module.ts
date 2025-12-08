@@ -36,10 +36,11 @@ import { BranchService } from './branch.service';
 import { BranchController } from './branch.controller';
 import { User } from '@modules/user/user.entity';
 import { UserModule } from '@modules/user/user.module';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Branch, User]),
+    TypeOrmModule.forFeature([Branch, User,CvdMapping ]),
     forwardRef(() => UserModule),
   ],
   controllers: [BranchController],

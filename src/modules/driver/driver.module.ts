@@ -7,12 +7,14 @@ import { User } from '@modules/user/user.entity';
 import { DriverController } from './driver.controller';
 import { DriverService } from './driver.service';
 import { Driver } from './entities/driver.entity';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Module({
      imports: [
         TypeOrmModule.forFeature([
             Driver,
-            User
+            User,
+            CvdMapping 
         ]),
          forwardRef(() => UserModule),
          forwardRef(() => AuthModule)

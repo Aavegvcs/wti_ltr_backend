@@ -8,6 +8,8 @@ import { Corporate } from './entities/corporate.entity';
 import { MediaModule } from '../media/media.module';
 import { User } from '../user/user.entity';
 import { UserModule } from '../user/user.module';
+import { Branch } from '@modules/branch/entities/branch.entity';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Module({
     imports: [
@@ -15,7 +17,7 @@ import { UserModule } from '../user/user.module';
         MediaModule,
         LogModule,
         forwardRef(() => UserModule),
-        TypeOrmModule.forFeature([Corporate, User])
+        TypeOrmModule.forFeature([Corporate, User, Branch, CvdMapping])
     ],
     controllers: [CorporateController],
     providers: [CorporateService],

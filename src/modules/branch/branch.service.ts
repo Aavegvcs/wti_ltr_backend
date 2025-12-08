@@ -213,11 +213,22 @@ import { Repository, EntityManager } from 'typeorm';
 import { Branch } from './entities/branch.entity';
 import { User } from '@modules/user/user.entity';
 import { UserService } from '@modules/user/user.service';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Injectable()
 export class BranchService {
   private readonly logger = new Logger(BranchService.name);
 
+  //   constructor(
+  //     @InjectRepository(Branch)
+  //     private readonly branchRepository: Repository<Branch>,
+
+  //     @InjectRepository(User)
+  //     private readonly employeeRepository: Repository<User>,
+
+  //     @Inject(forwardRef(() => UserService))
+  //     private readonly userService: UserService,
+  //   ) {}
   constructor(
     @InjectRepository(Branch)
     private readonly branchRepository: Repository<Branch>,
@@ -225,9 +236,13 @@ export class BranchService {
     @InjectRepository(User)
     private readonly employeeRepository: Repository<User>,
 
+    @InjectRepository(CvdMapping)
+    private readonly cvdRepository: Repository<CvdMapping>,
+
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
-  ) {}
+  ) { }
+
 
   // --------------------------------------------------------------------------
   // CREATE
@@ -244,6 +259,7 @@ export class BranchService {
       address: body.address,
       email: body.email,
       phone: body.phone,
+      isActive: body.isActive ?? true,
     });
 
     return await this.branchRepository.save(branch);
@@ -287,23 +303,64 @@ export class BranchService {
   // --------------------------------------------------------------------------
   // UPDATE
   // --------------------------------------------------------------------------
-  async update(id: number, body: any): Promise<Branch> {
-    const branch = await this.findById(id);
+  //   async update(id: number, body: any): Promise < Branch > {
+  //   const branch = await this.findById(id);
 
-    Object.assign(branch, {
-      branchCode: body.branchCode,
-      name: body.name,
-      city: body.city,
-      pincode: body.pincode,
-      address: body.address,
-      email: body.email,
-      phone: body.phone,
-      corporate: body.corporateId ? { id: body.corporateId } : branch.corporate,
-      state: body.stateId ? { id: body.stateId } : branch.state,
-    });
+  //   Object.assign(branch, {
+  //     branchCode: body.branchCode,
+  //     name: body.name,
+  //     city: body.city,
+  //     pincode: body.pincode,
+  //     address: body.address,
+  //     email: body.email,
+  //     phone: body.phone,
+  //     corporate: body.corporateId ? { id: body.corporateId } : branch.corporate,
+  //     state: body.stateId ? { id: body.stateId } : branch.state,
+  //     isActive: body.isActive ?? true,
+  //   });
 
-    return await this.branchRepository.save(branch);
+  //   return await this.branchRepository.save(branch);
+  // }
+ async update(id: number, body: any): Promise<Branch> {
+  const branch = await this.findById(id);
+
+  const wasActive = branch.isActive;
+
+  // ✅✅✅ BLOCK: Cannot activate branch if corporate is inactive
+  if (
+    body.isActive === true &&
+    branch.corporate &&
+    branch.corporate.isActive === false
+  ) {
+    throw new Error('Cannot activate branch while corporate is inactive');
   }
+
+  Object.assign(branch, {
+    branchCode: body.branchCode,
+    name: body.name,
+    city: body.city,
+    pincode: body.pincode,
+    address: body.address,
+    email: body.email,
+    phone: body.phone,
+    corporate: body.corporateId ? { id: body.corporateId } : branch.corporate,
+    state: body.stateId ? { id: body.stateId } : branch.state,
+    isActive: body.isActive ?? branch.isActive,
+  });
+
+  const updatedBranch = await this.branchRepository.save(branch);
+
+  // ✅✅✅ CASCADE: If branch becomes inactive → disable CVD
+  if (wasActive === true && updatedBranch.isActive === false) {
+    await this.cvdRepository.update(
+      { branch: { id } },
+      { isActive: false }
+    );
+  }
+
+  return updatedBranch;
+}
+
 
   // --------------------------------------------------------------------------
   // SOFT DELETE
@@ -316,11 +373,40 @@ export class BranchService {
   // --------------------------------------------------------------------------
   // TOGGLE ACTIVE STATUS
   // --------------------------------------------------------------------------
-  async toggleStatus(id: number): Promise<Branch> {
-    const branch = await this.findById(id);
-    branch.isActive = !branch.isActive;
-    return await this.branchRepository.save(branch);
+  // async toggleStatus(id: number): Promise<Branch> {
+  //   const branch = await this.findById(id);
+  //   branch.isActive = !branch.isActive;
+  //   return await this.branchRepository.save(branch);
+  // }
+ async toggleStatus(id: number): Promise<Branch> {
+  const branch = await this.findById(id);
+
+  const newStatus = !branch.isActive;
+
+  // ✅✅✅ BLOCK: Cannot activate branch if corporate is inactive
+  if (
+    newStatus === true &&
+    branch.corporate &&
+    branch.corporate.isActive === false
+  ) {
+    throw new Error('Cannot activate branch while corporate is inactive');
   }
+
+  branch.isActive = newStatus;
+
+  const updatedBranch = await this.branchRepository.save(branch);
+
+  // ✅✅✅ CASCADE WHEN TURNING INACTIVE
+  if (newStatus === false) {
+    await this.cvdRepository.update(
+      { branch: { id } },
+      { isActive: false }
+    );
+  }
+
+  return updatedBranch;
+}
+
 
   // --------------------------------------------------------------------------
   // GET ONLY IDS
