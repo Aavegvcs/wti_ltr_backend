@@ -14,7 +14,7 @@ import {
 import { User } from '@modules/user/user.entity';
 import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
-@Index(['vehicleName'])   // 👈 This one is fine
+@Index(['vehicleName'])  
 @Entity({ name: 'vehicle' })
 export class Vehicle {
     @PrimaryGeneratedColumn()

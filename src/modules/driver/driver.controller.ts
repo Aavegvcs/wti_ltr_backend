@@ -1,22 +1,4 @@
 
-// import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
-// import { ApiOperation, ApiTags } from '@nestjs/swagger';
-// import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
-
-// @ApiTags('driver')
-// @Controller('driver')
-// export class DriverController {
-//     constructor() {}
-
-//     // @UseGuards(JwtAuthGuard)
-//     // @Post('createClaim')
-//     // @ApiOperation({ summary: 'this api create new cliam' })
-//     // async createClaim(@Body() reqBody: any) {
-//     //     const response = await this._claimService.createClaim(reqBody);
-//     //     return response;
-//     // }
-
-// }
 import { Body, Controller, Get, Param, Patch, Post, Query, Delete, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DriverService } from './driver.service';
@@ -58,11 +40,6 @@ export class DriverController {
         return this.driverService.deleteDriver(id);
     }
 
-    // @Patch('change-status/:id')
-    // @ApiOperation({ summary: 'Activate/Deactivate driver' })
-    // async changeStatus(@Param('id') id: number, @Body() body: { isActive: boolean }) {
-    //     return this.driverService.changeStatus(id, body.isActive);
-    // }
     @UseGuards(JwtAuthGuard)
     @Patch('change-status/:id')
     async changeStatus(@Param('id') id: string, @Body() body: { isActive: boolean }) {

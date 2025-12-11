@@ -20,25 +20,9 @@ export class VehicleService {
     ) { }
 
     // ➤ CREATE VEHICLE
-    // async createVehicle(reqBody: any) {
-    //     try {
-    //         let user = await this.loggedInsUserService.getCurrentUser();
-    //         if (!user) user = { id: 1 } as User;
 
-    //         const newVehicle = this.vehicleRepo.create({
-    //             ...reqBody,
-    //             createdBy: { id: user.id } as any,
-    //             updatedBy: { id: user.id } as any,
-    //         });
-
-    //         const saved = await this.vehicleRepo.save(newVehicle);
-    //         return standardResponse(true, "Vehicle created successfully", 201, saved);
-
-    //     } catch (error) {
-    //         return standardResponse(false, error.message, 500);
-    //     }
-    // }
     async createVehicle(reqBody: any) {
+        console.log("🔥 BACKEND RECEIVED BODY:", reqBody);
         try {
             const user = await this.loggedInsUserService.getCurrentUser();
             if (!user) return standardResponse(false, "User not logged in", 401);
@@ -96,73 +80,39 @@ export class VehicleService {
     }
 
     // ➤ UPDATE VEHICLE
-    // async updateVehicle(id: number, reqBody: any) {
-    //     let user = await this.loggedInsUserService.getCurrentUser();
-    //     if (!user) user = { id: 1 } as User;
 
-    //     const vehicle = await this.vehicleRepo.findOne({ where: { id } });
-    //     if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
 
-    //     await this.vehicleRepo.update(id, {
-    //         ...reqBody,
-    //         updatedBy: { id: user.id } as any
-    //     });
-
-    //     const updated = await this.vehicleRepo.findOne({ where: { id } });
-
-    //     return standardResponse(true, "Vehicle updated", 200, updated);
-    // }
-    //    async updateVehicle(id: number, reqBody: any) {
-    //     const user = await this.loggedInsUserService.getCurrentUser();
-    //     if (!user) return standardResponse(false, "User not logged in", 401);
-
-    //     const vehicle = await this.vehicleRepo.findOne({ where: { id } });
-    //     if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
-
-    //     const wasActive = vehicle.isActive;
-
-    //     await this.vehicleRepo.update(id, {
-    //         ...reqBody,
-    //         updatedBy: { id: user.id } as any,
-    //     });
-
-    //     const updated = await this.vehicleRepo.findOne({ where: { id } });
-
-    //     // ✅✅✅ CASCADE: VEHICLE → CVD
-    //     if (wasActive === true && updated?.isActive === false) {
-    //         await this.cvdRepo.update(
-    //             { vehicle: { id } },
-    //             { isActive: false }
-    //         );
-    //     }
-
-    //     return standardResponse(true, "Vehicle updated", 200, updated);
-    // }
     async updateVehicle(id: number, reqBody: any) {
+        // console.log("🔥 BACKEND RECEIVED BODY:", reqBody);
         const user = await this.loggedInsUserService.getCurrentUser();
-        if (!user) return standardResponse(false, "User not logged in", 401);
+        // console.log("here user details", user);
 
+        if (!user) return standardResponse(false, "User not logged in", 401);
+        // console.log("🔥 BACKEND RECEIVED BODY22:", reqBody);
         const vehicle = await this.vehicleRepo.findOne({ where: { id } });
         if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
 
         const wasActive = vehicle.isActive;
 
-        // ✅✅✅ FORCE BOOLEAN (CRITICAL)
+        // FORCE BOOLEAN (CRITICAL)
         if (reqBody.isActive !== undefined) {
             reqBody.isActive =
                 reqBody.isActive === true || reqBody.isActive === 'true';
         }
 
-        console.log('BACKEND UPDATE PAYLOAD:', reqBody); // ✅ TEMP DEBUG
+        console.log('BACKEND  vehicle UPDATE PAYLOAD:', reqBody); 
 
-        await this.vehicleRepo.update(id, {
+
+        await this.vehicleRepo.save({
+            id,
             ...reqBody,
             updatedBy: { id: user.id } as any,
         });
 
+
         const updated = await this.vehicleRepo.findOne({ where: { id } });
 
-        // ✅✅✅ CASCADE: VEHICLE → CVD
+        // CASCADE: VEHICLE → CVD
         if (wasActive === true && updated?.isActive === false) {
             await this.cvdRepo.update(
                 { vehicle: { id } },
@@ -186,18 +136,7 @@ export class VehicleService {
     }
 
     // ➤ CHANGE ACTIVE STATUS
-    // async changeStatus(id: number, status: boolean) {
-    //     const vehicle = await this.vehicleRepo.findOne({ where: { id } });
-    //     if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
 
-    //     await this.vehicleRepo.update(id, { isActive: status });
-
-    //     return standardResponse(
-    //         true,
-    //         `Vehicle ${status ? 'activated' : 'deactivated'}`,
-    //         200
-    //     );
-    // }
     async changeStatus(id: number, status: boolean) {
         const user = await this.loggedInsUserService.getCurrentUser();
         if (!user) return standardResponse(false, "User not logged in", 401);
@@ -210,7 +149,7 @@ export class VehicleService {
             updatedBy: { id: user.id } as any, // ✅ VERY IMPORTANT
         });
 
-        // ✅✅✅ CASCADE: if vehicle becomes INACTIVE → disable CVD
+        //  CASCADE: if vehicle becomes INACTIVE → disable CVD
         if (status === false) {
             await this.cvdRepo.update(
                 { vehicle: { id } },

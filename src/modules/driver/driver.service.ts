@@ -78,21 +78,7 @@ export class DriverService {
     }
 
     // UPDATE DRIVER
-    // async updateDriver(id: number, reqBody: any) {
-    //     const user = await this.loggedInsUserService.getCurrentUser();
 
-    //     const driver = await this.driverRepo.findOne({ where: { id } });
-    //     if (!driver) return standardResponse(false, "Driver not found", 404);
-
-    //     await this.driverRepo.update(id, {
-    //         ...reqBody,
-    //         updatedBy: user
-    //     });
-
-    //     const updatedData = await this.driverRepo.findOne({ where: { id } });
-
-    //     return standardResponse(true, "Driver updated", 200, updatedData);
-    // }
     async updateDriver(id: number, reqBody: any) {
         const user = await this.loggedInsUserService.getCurrentUser();
 
@@ -108,7 +94,7 @@ export class DriverService {
 
         const updatedData = await this.driverRepo.findOne({ where: { id } });
 
-        // ✅✅✅ CASCADE: DRIVER → CVD
+        // CASCADE: DRIVER → CVD
         if (wasActive === true && updatedData?.isActive === false) {
             await this.cvdRepo.update(
                 { driver: { id } },
@@ -131,38 +117,26 @@ export class DriverService {
     }
 
     // CHANGE DRIVER STATUS
-    // async changeStatus(id: number, status: boolean) {
-    //     const driver = await this.driverRepo.findOne({
-    //         where: { id },
-    //         withDeleted: false
-    //     });
-
-    //     if (!driver) return standardResponse(false, "Driver not found", 404);
-
-    //     await this.driverRepo.update(id, { isActive: status });
-
-    //     return standardResponse(true, `Driver ${status ? 'activated' : 'deactivated'}`, 200);
-    // }
     async changeStatus(id: number, status: boolean) {
-    const driver = await this.driverRepo.findOne({
-        where: { id },
-        withDeleted: false
-    });
+        const driver = await this.driverRepo.findOne({
+            where: { id },
+            withDeleted: false
+        });
 
-    if (!driver) return standardResponse(false, "Driver not found", 404);
+        if (!driver) return standardResponse(false, "Driver not found", 404);
 
-    await this.driverRepo.update(id, { isActive: status });
+        await this.driverRepo.update(id, { isActive: status });
 
-    // ✅✅✅ CASCADE: if driver becomes INACTIVE → disable CVD
-    if (status === false) {
-        await this.cvdRepo.update(
-            { driver: { id } },
-            { isActive: false }
-        );
+        // CASCADE: if driver becomes INACTIVE → disable CVD
+        if (status === false) {
+            await this.cvdRepo.update(
+                { driver: { id } },
+                { isActive: false }
+            );
+        }
+
+        return standardResponse(true, `Driver ${status ? 'activated' : 'deactivated'}`, 200);
     }
-
-    return standardResponse(true, `Driver ${status ? 'activated' : 'deactivated'}`, 200);
-}
 
 
 }

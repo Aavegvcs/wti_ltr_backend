@@ -7,15 +7,14 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 @ApiTags('vehicle')
 @Controller('vehicle')
 export class VehicleController {
-    constructor(private readonly vehicleService: VehicleService) {}
-
-    @Post('create')
+    constructor(private readonly vehicleService: VehicleService) { }
     @UseGuards(JwtAuthGuard)
+    @Post('create')
     @ApiOperation({ summary: 'Create a new vehicle' })
     async createVehicle(@Body() body: any) {
         return this.vehicleService.createVehicle(body);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Get('list')
     @ApiOperation({ summary: 'Get all vehicles' })
     async listVehicles(
@@ -25,25 +24,25 @@ export class VehicleController {
     ) {
         return this.vehicleService.getAllVehicles(page, limit, search);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Get(':vehicleNumber')
     @ApiOperation({ summary: 'Get vehicle by vehicle number' })
     async getVehicle(@Param('vehicleNumber') vehicleNumber: string) {
         return this.vehicleService.getVehicleByNumber(vehicleNumber);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Patch('update/:id')
     @ApiOperation({ summary: 'Update vehicle' })
     async updateVehicle(@Param('id') id: string, @Body() body: any) {
         return this.vehicleService.updateVehicle(Number(id), body);
     }
-
+    @UseGuards(JwtAuthGuard)
     @Delete('delete/:id')
     @ApiOperation({ summary: 'Delete vehicle' })
     async deleteVehicle(@Param('id') id: string) {
         return this.vehicleService.deleteVehicle(Number(id));
     }
-
+    @UseGuards(JwtAuthGuard)
     @Patch('change-status/:id')
     @ApiOperation({ summary: 'Activate/Deactivate vehicle' })
     async changeStatus(@Param('id') id: string, @Body() body: { isActive: boolean }) {
