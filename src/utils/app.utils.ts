@@ -638,6 +638,14 @@ console.log(" in make user code funtion", userCode);
   return userCode;
 }
 
+export function makeCorporateCode(corporateName: string, corporateId: number): string {
+  const corporatePart = corporateName.substring(0, 3).toUpperCase();
+
+  const corporateCode = `CO${corporatePart}${corporateId}`;
+
+  return corporateCode;
+}
+
 
 export enum InsuranceModuleType {
     dashboard = 'dashboard',

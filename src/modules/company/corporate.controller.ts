@@ -5,8 +5,9 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 import { CreateCorporateDto } from './dto/company-create.dto';
 import { UpdateCorporateDto } from './dto/update-company.dto';
 import { Req } from '@nestjs/common';
+import { ApiOperation } from '@nestjs/swagger';
 
-@Controller('companies')
+@Controller('corporate')
 export class CorporateController {
     constructor(private readonly corporateService: CorporateService) { }
 
@@ -40,10 +41,14 @@ export class CorporateController {
     findOne(@Param('id') id: number) {
         return this.corporateService.findCorporateById(id);
     }
+
     @UseGuards(JwtAuthGuard)
     @Post('bulkUpload')
+       @ApiOperation({ summary: 'bulk upload of corporate' })
     async bulkUpload(@Body() reqBody: any) {
-        return this.corporateService.corporateBulkUpload(reqBody);
+        // console.log("in this qpi");
+        
+        return this.corporateService.corporateBulkUpload1(reqBody);
     }
 
 

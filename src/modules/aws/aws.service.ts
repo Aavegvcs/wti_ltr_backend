@@ -121,7 +121,7 @@ async getFile(documentType: string, fileName: string, res: Response): Promise<vo
         'image/webp',
         'application/pdf',
         'text/plain',
-      ];
+      ];  
       const disposition = previewableTypes.includes(mimeType) ? 'inline' : 'attachment';
 
       // console.log('Content-Type from S3:', ContentType);
