@@ -1,8 +1,4 @@
-import {
-    Injectable,
-    Inject,
-    forwardRef
-} from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
@@ -10,7 +6,7 @@ import { Corporate } from './entities/corporate.entity';
 import { LogService } from '../log/log.service';
 import { MediaService } from '../media/media.service';
 import { User } from '../user/user.entity';
-import { orderByKey, orderByValue } from 'src/utils/app.utils';
+import { makeCorporateCode, orderByKey, orderByValue } from 'src/utils/app.utils';
 // import { Action } from '../ability/ability.factory';
 import { UserService } from '../user/user.service';
 import { CreateCorporateDto } from './dto/company-create.dto';
@@ -24,10 +20,10 @@ import { State } from '@modules/states/entities/state.entity';
 import { In } from 'typeorm';
 import { standardResponse } from 'src/utils/helper/response.helper';
 import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
+import { runInNewContext } from 'vm';
 
 @Injectable()
 export class CorporateService {
-
     constructor(
         @InjectRepository(Corporate)
         private corporateRepo: Repository<Corporate>,
@@ -40,12 +36,12 @@ export class CorporateService {
 
         @InjectRepository(Country)
         private countryRepo: Repository<Country>,
+
         @InjectRepository(State)
         private stateRepo: Repository<State>,
 
-        private loggedInsUserService: LoggedInsUserService,
-    ) { }
-
+        private loggedInsUserService: LoggedInsUserService
+    ) {}
 
     async companyList(req: any): Promise<any> {
         const query = this.corporateRepo
@@ -65,8 +61,8 @@ export class CorporateService {
             pagination: {
                 total,
                 page: req?.QUERY_STRING?.page || 1,
-                limit: req?.QUERY_STRING?.limit || items.length,
-            },
+                limit: req?.QUERY_STRING?.limit || items.length
+            }
         };
     }
 
@@ -76,18 +72,17 @@ export class CorporateService {
         const corporate = this.corporateRepo.create({
             ...rest,
             country: country ? { id: country } : undefined,
-            state: state ? { id: state } : undefined,
+            state: state ? { id: state } : undefined
         });
 
         return await this.corporateRepo.save(corporate);
     }
 
-
     async updateCorporate(dto: UpdateCorporateDto) {
         const { id, country, state, ...rest } = dto;
 
         const corporate = await this.corporateRepo.findOne({
-            where: { id },
+            where: { id }
         });
 
         if (!corporate) {
@@ -99,7 +94,7 @@ export class CorporateService {
         await this.corporateRepo.update(id, {
             ...rest,
             country: country ? { id: country } : undefined,
-            state: state ? { id: state } : undefined,
+            state: state ? { id: state } : undefined
         });
 
         const updatedCorporate = await this.findCorporateById(id);
@@ -107,21 +102,14 @@ export class CorporateService {
         // ✅✅✅ CASCADE: IF CORPORATE TURNED INACTIVE
         if (wasActive === true && updatedCorporate.isActive === false) {
             // 1️⃣ Deactivate all branches under this corporate
-            await this.branchRepo.update(
-                { corporate: { id } },
-                { isActive: false }
-            );
+            await this.branchRepo.update({ corporate: { id } }, { isActive: false });
 
             // 2️⃣ Deactivate all CVD mappings under this corporate
-            await this.cvdRepo.update(
-                { corporate: { id } },
-                { isActive: false }
-            );
+            await this.cvdRepo.update({ corporate: { id } }, { isActive: false });
         }
 
         return updatedCorporate;
     }
-
 
     async deleteCorporate(id: number) {
         return this.corporateRepo.softDelete(id);
@@ -144,22 +132,20 @@ export class CorporateService {
                 {
                     successCount: 0,
                     failedCount: 0,
-                    failed: [],
+                    failed: []
                 },
                 null,
-                'companies/corporateBulkUpload',
+                'companies/corporateBulkUpload'
             );
         }
 
         // 2️⃣ DUPLICATE CHECK (LIKE BRANCH)
-        const incomingCodes = data
-            .map((item: any) => item['Corporate Code'])
-            .filter((code: any) => !!code);
+        const incomingCodes = data.map((item: any) => item['Corporate Code']).filter((code: any) => !!code);
 
         const existingCorporates = incomingCodes.length
             ? await this.corporateRepo.find({
-                where: { corporateCode: In(incomingCodes) },
-            })
+                  where: { corporateCode: In(incomingCodes) }
+              })
             : [];
 
         const existingSet = new Set(existingCorporates.map((c) => c.corporateCode));
@@ -176,7 +162,7 @@ export class CorporateService {
                 failed.push({
                     index: rowIndex,
                     name: name || code || 'N/A',
-                    reason: 'Corporate Code or Name missing',
+                    reason: 'Corporate Code or Name missing'
                 });
                 return;
             }
@@ -185,7 +171,7 @@ export class CorporateService {
                 failed.push({
                     index: rowIndex,
                     name: code,
-                    reason: `Corporate '${code}' already exists`,
+                    reason: `Corporate '${code}' already exists`
                 });
             } else {
                 uniqueData.push(item);
@@ -196,12 +182,8 @@ export class CorporateService {
         const allStates = await this.stateRepo.find();
         const allCountries = await this.countryRepo.find();
 
-        const stateMap = new Map(
-            allStates.map((s) => [s.name.trim().toLowerCase(), s.id]),
-        );
-        const countryMap = new Map(
-            allCountries.map((c) => [c.name.trim().toLowerCase(), c.id]),
-        );
+        const stateMap = new Map(allStates.map((s) => [s.name.trim().toLowerCase(), s.id]));
+        const countryMap = new Map(allCountries.map((c) => [c.name.trim().toLowerCase(), c.id]));
 
         // 4️⃣ BUILD CORPORATE ENTITIES
         const toInsert: Corporate[] = [];
@@ -230,7 +212,7 @@ export class CorporateService {
                         failed.push({
                             index: rowIndex,
                             name: corporateName,
-                            reason: `State not found in DB: ${stateName}`,
+                            reason: `State not found in DB: ${stateName}`
                         });
                         continue;
                     }
@@ -246,7 +228,7 @@ export class CorporateService {
                         failed.push({
                             index: rowIndex,
                             name: corporateName,
-                            reason: `Country not found in DB: ${countryName}`,
+                            reason: `Country not found in DB: ${countryName}`
                         });
                         continue;
                     }
@@ -260,23 +242,17 @@ export class CorporateService {
                     adminName,
                     email,
                     address,
-                    isActive:
-                        isActiveRaw == null
-                            ? true
-                            : String(isActiveRaw).toLowerCase() === 'true',
+                    isActive: isActiveRaw == null ? true : String(isActiveRaw).toLowerCase() === 'true',
                     state: stateId ? ({ id: stateId } as any) : undefined,
-                    country: countryId ? ({ id: countryId } as any) : undefined,
+                    country: countryId ? ({ id: countryId } as any) : undefined
                 });
 
                 toInsert.push(corporate);
             } catch (err: any) {
                 failed.push({
                     index: rowIndex,
-                    name:
-                        item['Corporate Name'] ||
-                        item['Corporate Code'] ||
-                        'N/A',
-                    reason: err?.message || 'Internal processing error',
+                    name: item['Corporate Name'] || item['Corporate Code'] || 'N/A',
+                    reason: err?.message || 'Internal processing error'
                 });
             }
         }
@@ -300,16 +276,339 @@ export class CorporateService {
             {
                 successCount,
                 failedCount,
-                failed,
+                failed
             },
             null,
-            'companies/corporateBulkUpload',
+            'companies/corporateBulkUpload'
         );
     }
 
+    // async corporateBulkUpload1(reqBody: any): Promise<any> {
+    //     const failed: { index: number; name: string; reason: string }[] = [];
+    //     const data = reqBody.data || [];
+    //     const startIndex = reqBody.startIndex || 1;
+    //     const userEntity = await this.loggedInsUserService.getCurrentUser();
 
+    //     if (!userEntity) {
+    //         return standardResponse(false, 'Logged user not found', 404, null, null, 'corporate/corporateBulkUpload');
+    //     }
+    //     try {
+    //         if (!Array.isArray(data) || data.length === 0) {
+    //             const result = {
+    //                 successCount: 0,
+    //                 failedCount: 0,
+    //                 failed: [],
+    //                 message: 'No data provided for bulk upload'
+    //             };
+    //             return standardResponse(
+    //                 true,
+    //                 'No data provided for bulk upload',
+    //                 404,
+    //                 result,
+    //                 null,
+    //                 'corporate/corporateBulkUpload'
+    //             );
+    //         }
 
+    //         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    //         const incomingNames = data.map((item) => item.companyName);
+    //         const existingCompanies = await this.corporateRepo.find({
+    //             where: { corporateName: In(incomingNames) },
+    //             select: ['corporateName']
+    //         });
+
+    //         const existingNames = new Set(existingCompanies.map((c) => c.corporateName));
+    //         const uniqueData = [];
+    //         const headerOffset = 1;
+    //         data.forEach((item, index) => {
+    //             const rowIndex = startIndex + index + headerOffset;
+
+    //             if (existingNames.has(item.corporateName)) {
+    //                 failed.push({
+    //                     index: rowIndex,
+    //                     name: item.corporateName,
+    //                     reason: `Corporate with name ${item.corporateName} already exists`
+    //                 });
+    //                 return;
+    //             }
+
+    //             if (item.email && !emailRegex.test(item.email)) {
+    //                 failed.push({
+    //                     index: rowIndex,
+    //                     name: item.corporateName || 'Unknown',
+    //                     reason: `Invalid email format: ${item.email}`
+    //                 });
+    //                 return;
+    //             }
+
+    //             uniqueData.push(item);
+    //         });
+
+    //         // Step 4: Bulk insert only unique data if any
+    //         if (uniqueData.length > 0) {
+    //             try {
+    //                 const insertData = uniqueData.map((item) => ({
+    //                     ...item,
+    //                     createdBy: userEntity // or whatever field represents the user in your table
+    //                 }));
+    //                 await this.corporateRepo
+    //                     .createQueryBuilder()
+    //                     .insert()
+    //                     .into(this.corporateRepo.metadata.tableName)
+    //                     .values(insertData)
+    //                     .execute();
+    //             } catch (error) {
+    //                 uniqueData.forEach((item, index) => {
+    //                     failed.push({
+    //                         index: startIndex + data.indexOf(item),
+    //                         name: item.corporateName,
+    //                         reason: error.message || 'Database insert error'
+    //                     });
+    //                 });
+    //             }
+    //         }
+
+    //         let message = null;
+    //         const successCount = uniqueData.length - failed.length;
+    //         const failedCount = failed.length;
+    //         console.log('before set message in corporate bulk upload', successCount, failedCount);
+    //         if (successCount > 0 && failedCount > 0) {
+    //             message = 'Data partialy inserted!';
+    //         } else if (successCount < 0 && failedCount > 0) message = 'Failed to inserted data';
+    //         else {
+    //             console.log('else part in corporate bulk upload', successCount, failedCount);
+
+    //             message = 'Data inserted successfully.';
+    //         }
+    //         return standardResponse(
+    //             true,
+    //             message,
+    //             202,
+    //             {
+    //                 successCount: successCount,
+    //                 failedCount: failedCount,
+    //                 failed
+    //             },
+    //             null,
+    //             'corporate/corporateBulkUpload'
+    //         );
+    //     } catch (error) {
+    //         return standardResponse(
+    //             true,
+    //             'Failed! to insert data',
+    //             404,
+    //             {
+    //                 successCount: 0,
+    //                 failedCount: data.length,
+    //                 failed: data.map((item, index) => ({
+    //                     index: startIndex + index,
+    //                     name: item.corporateName || 'Unknown',
+    //                     reason: error.message || 'Unexpected server error'
+    //                 }))
+    //             },
+    //             null,
+    //             'corporate/corporateBulkUpload'
+    //         );
+    //     }
+    // }
+
+async corporateBulkUpload1(reqBody: any): Promise<any> {
+
+    const failed: { index: number; name: string; reason: string }[] = [];
+    const data = reqBody.data || [];
+    const startIndex = typeof reqBody.startIndex === 'number' ? reqBody.startIndex : 1;
+    const userEntity = await this.loggedInsUserService.getCurrentUser();
+
+    if (!userEntity) {
+      return standardResponse(false, 'Logged user not found', 404, null, null, 'corporate/corporateBulkUpload');
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return standardResponse(true, 'No data provided for bulk upload', 404, {
+        successCount: 0,
+        failedCount: 0,
+        failed: [],
+        message: 'No data provided for bulk upload'
+      }, null, 'corporate/corporateBulkUpload');
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const incomingNames = data
+      .map((item: any) => (item.corporateName || item.companyName || '').trim())
+      .filter((n: string) => n);
+    let existingNames = new Set<string>();
+    if (incomingNames.length > 0) {
+      const existingCompanies = await this.corporateRepo.find({
+        where: { corporateName: In(incomingNames) },
+        select: ['corporateName']
+      });
+      existingNames = new Set(existingCompanies.map((c) => (c.corporateName || '').trim()));
+    }
+    const headerOffset = 1;
+    const uniqueData: any[] = [];
+    data.forEach((item: any, index: number) => {
+      const rowIndex = startIndex + index + headerOffset;
+      const name = (item.corporateName || '').trim();
+
+      if (!name) {
+        failed.push({
+          index: rowIndex,
+          name: 'Unknown',
+          reason: 'Corporate name missing'
+        });
+        return;
+      }
+
+      if (existingNames.has(name)) {
+        failed.push({
+          index: rowIndex,
+          name,
+          reason: `Corporate with name '${name}' already exists`
+        });
+        return;
+      }
+
+      if (item.email && !emailRegex.test(item.email)) {
+        failed.push({
+          index: rowIndex,
+          name,
+          reason: `Invalid email format: ${item.email}`
+        });
+        return;
+      }
+
+      uniqueData.push({
+        _rowIndex: rowIndex,
+        corporateName: name,
+        phoneNumber: item.phoneNumber || null,
+        adminName: item.adminName,
+        isActive:true,
+        address: item.address || null,
+        stateName: (item.state || '').trim(),
+        countryName: (item.country || '').trim(),
+        email: item.email || null,
+        raw: item
+      });
+    });
+
+    if (uniqueData.length === 0) {
+      return standardResponse(true, 'No valid data to insert', 200, {
+        successCount: 0,
+        failedCount: failed.length,
+        failed
+      }, null, 'corporate/corporateBulkUpload');
+    }
+
+    try {
+      const stateNames = Array.from(new Set(uniqueData.map((d) => d.stateName).filter((s) => s)));
+      const countryNames = Array.from(new Set(uniqueData.map((d) => d.countryName).filter((s) => s)));
+
+      const stateMap = new Map<string, State>();
+      if (stateNames.length > 0) {
+        const states = await this.stateRepo.find({ where: { name: In(stateNames) } });
+        states.forEach((s) => stateMap.set((s.name || '').trim().toLowerCase(), s));
+      }
+
+      const countryMap = new Map<string, Country>();
+      if (countryNames.length > 0) {
+        const countries = await this.countryRepo.find({ where: { name: In(countryNames) } });
+        countries.forEach((c) => countryMap.set((c.name || '').trim().toLowerCase(), c));
+      }
+      const successCount = await this.corporateRepo.manager.transaction<number>(async (manager) => {
+        const corpRepoTx = manager.getRepository(Corporate);
+        let success = 0;
+
+        for (const row of uniqueData) {
+          const rowIndex = row._rowIndex;
+          const corporateName = row.corporateName;
+
+          try {
+            let stateEntity: State | undefined = undefined;
+            if (row.stateName) {
+              stateEntity = stateMap.get(row.stateName.toLowerCase());
+              if (!stateEntity) {
+                failed.push({
+                  index: rowIndex,
+                  name: corporateName,
+                  reason: `State '${row.stateName}' not found`
+                });
+                continue;
+              }
+            }
+
+            let countryEntity: Country | undefined = undefined;
+            if (row.countryName) {
+              countryEntity = countryMap.get(row.countryName.toLowerCase());
+              if (!countryEntity) {
+                failed.push({
+                  index: rowIndex,
+                  name: corporateName,
+                  reason: `Country '${row.countryName}' not found`
+                });
+                continue;
+              }
+            }
+            const tempCode = `TEMP-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+            const corporateEntity = corpRepoTx.create({
+              corporateName: corporateName,
+              corporateCode: tempCode,
+              phoneNumber: row.phoneNumber,
+              adminName: row.adminName,
+              isActive: row.isActive,
+              address: row.address,
+              email: row.email,
+              createdBy: userEntity,
+              ...(stateEntity ? { state: stateEntity } : {}),
+              ...(countryEntity ? { country: countryEntity } : {})
+            } as Partial<Corporate>);
+
+            const saved = await corpRepoTx.save(corporateEntity);
+
+            let generatedCode: string | undefined;
+
+              generatedCode = await makeCorporateCode(saved.corporateName, saved.id);
+
+            if (generatedCode) {
+              saved.corporateCode = generatedCode;
+              await corpRepoTx.save(saved);
+            }
+
+            success++;
+          } catch (err: any) {
+            failed.push({
+              index: rowIndex,
+              name: corporateName,
+              reason: err?.message || 'Error saving corporate'
+            });
+          }
+        }
+
+        return success;
+      });
+
+      const failedCount = failed.length;
+      let message = 'Data inserted successfully.';
+      if (successCount > 0 && failedCount > 0) message = 'Data partially inserted!';
+      else if (successCount <= 0 && failedCount > 0) message = 'Failed to insert data';
+
+      return standardResponse(true, message, 202, {
+        successCount,
+        failedCount,
+        failed
+      }, null, 'corporate/corporateBulkUpload');
+
+    } catch (error: any) {
+      return standardResponse(false, 'Failed to insert data', 500, {
+        successCount: 0,
+        failedCount: uniqueData.length,
+        failed: uniqueData.map((item) => ({
+          index: item._rowIndex,
+          name: item.corporateName,
+          reason: error?.message || 'Unexpected server error'
+        }))
+      }, null, 'corporate/corporateBulkUpload');
+    }
+  }
 
 
 }
-
