@@ -4,10 +4,12 @@ import { CorporateService } from './corporate.service';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 import { CreateCorporateDto } from './dto/company-create.dto';
 import { UpdateCorporateDto } from './dto/update-company.dto';
+import { Req } from '@nestjs/common';
 
 @Controller('companies')
 export class CorporateController {
     constructor(private readonly corporateService: CorporateService) { }
+
 
     @UseGuards(JwtAuthGuard)
     @Post('list')
@@ -38,6 +40,15 @@ export class CorporateController {
     findOne(@Param('id') id: number) {
         return this.corporateService.findCorporateById(id);
     }
-  
+    @UseGuards(JwtAuthGuard)
+    @Post('bulkUpload')
+    async bulkUpload(@Body() reqBody: any) {
+        return this.corporateService.corporateBulkUpload(reqBody);
+    }
+
+
+
+
+
 
 }
