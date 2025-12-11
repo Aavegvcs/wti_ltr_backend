@@ -71,7 +71,7 @@ export class Corporate extends BaseEntity {
 
     @ApiProperty({
         description: 'Phone Number',
-        example: ' 675879'
+        example: ' 9832134534'
     })
     @Column({ nullable: true })
     phoneNumber: string;

@@ -8,12 +8,14 @@ import { User } from '@modules/user/user.entity';
 import { VehicleController } from './vehicle.controller';
 import { VehicleService } from './vehicle.service';
 import { Vehicle } from './entities/vehicle.entity';
+import { CvdMapping } from '@modules/cvd-mapping/enitites/cvd-mapping.entity';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([
             Vehicle,  // ✅ ADD THIS
-            User
+            User,
+            CvdMapping
         ]),
         forwardRef(() => UserModule),
         forwardRef(() => AuthModule),

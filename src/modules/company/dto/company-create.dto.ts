@@ -6,7 +6,7 @@ export class CreateCorporateDto {
   @ApiProperty()
   corporateCode: string;
 
-  @ApiProperty()
+  @ApiProperty( { required: true })
   corporateName: string;
 
   @ApiProperty({ required: false })

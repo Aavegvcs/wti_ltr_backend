@@ -32,6 +32,7 @@ export class CvdMappingService {
     ) { }
 
 
+    // ➤ LIST ALL MAPPINGS
     // async createMapping(body: any) {
     //     try {
     //         const user = await this.loggedInsUserService.getCurrentUser();
@@ -39,6 +40,7 @@ export class CvdMappingService {
 
     //         const { corporateId, branchId, vehicleId, driverId } = body;
 
+    //         // === Fetch Entities ===
     //         const corporate = await this.corporateRepo.findOne({ where: { id: corporateId } });
     //         if (!corporate) return standardResponse(false, "Corporate not found", 404);
 
@@ -52,25 +54,47 @@ export class CvdMappingService {
     //         if (!driver) return standardResponse(false, "Driver not found", 404);
 
 
-    //         // 🚫 RULE A: vehicle must be free
-
-    //         // VEHICLE MUST BE FREE
+    //         // ============================================================
+    //         // RULE A : VEHICLE MUST BE FREE
+    //         // ============================================================
     //         const activeVehicle = await this.cvdRepo.findOne({
-    //             where: { corporate, isActive: true }
+    //             where: {
+    //                 vehicle: { id: vehicleId },
+    //                 isActive: true
+    //             }
     //         });
+
     //         if (activeVehicle) {
-    //             return standardResponse(false, "Vehicle already linked to a driver/branch", 400);
+    //             return standardResponse(
+    //                 false,
+    //                 "This vehicle is already linked to a driver/branch",
+    //                 400
+    //             );
     //         }
 
-    //         // DRIVER MUST BE FREE
+
+    //         // ============================================================
+    //         // RULE B : DRIVER MUST BE FREE
+    //         // ============================================================
     //         const activeDriver = await this.cvdRepo.findOne({
-    //             where: { driver, isActive: true }
+    //             where: {
+    //                 driver: { id: driverId },
+    //                 isActive: true
+    //             }
     //         });
+
     //         if (activeDriver) {
-    //             return standardResponse(false, "Driver already linked to a vehicle/branch", 400);
+    //             return standardResponse(
+    //                 false,
+    //                 "This driver is already linked to another vehicle/branch",
+    //                 400
+    //             );
     //         }
 
 
+    //         // ============================================================
+    //         // CREATE NEW MAPPING
+    //         // ============================================================
     //         const newMapping = this.cvdRepo.create({
     //             corporate,
     //             branch,
@@ -81,19 +105,22 @@ export class CvdMappingService {
     //             updatedBy: user,
     //         });
 
-
-
     //         const saved = await this.cvdRepo.save(newMapping);
 
-    //         return standardResponse(true, "CVD mapping created successfully", 201, saved);
+
+    //         return standardResponse(
+    //             true,
+    //             "CVD mapping created successfully",
+    //             201,
+    //             saved
+    //         );
+
 
     //     } catch (err) {
+    //         console.log("ERR:", err);
     //         return standardResponse(false, err.message, 500);
     //     }
     // }
-
-
-    // ➤ LIST ALL MAPPINGS
     async createMapping(body: any) {
         try {
             const user = await this.loggedInsUserService.getCurrentUser();
@@ -104,57 +131,48 @@ export class CvdMappingService {
             // === Fetch Entities ===
             const corporate = await this.corporateRepo.findOne({ where: { id: corporateId } });
             if (!corporate) return standardResponse(false, "Corporate not found", 404);
+            if (!corporate.isActive)
+                return standardResponse(false, "Corporate is inactive", 400);
 
             const branch = await this.branchRepo.findOne({ where: { id: branchId } });
             if (!branch) return standardResponse(false, "Branch not found", 404);
+            if (!branch.isActive)
+                return standardResponse(false, "Branch is inactive", 400);
 
             const vehicle = await this.vehicleRepo.findOne({ where: { id: vehicleId } });
             if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
+            if (!vehicle.isActive)
+                return standardResponse(false, "Vehicle is inactive", 400);
 
             const driver = await this.driverRepo.findOne({ where: { id: driverId } });
             if (!driver) return standardResponse(false, "Driver not found", 404);
-
+            if (!driver.isActive)
+                return standardResponse(false, "Driver is inactive", 400);
 
             // ============================================================
             // RULE A : VEHICLE MUST BE FREE
             // ============================================================
             const activeVehicle = await this.cvdRepo.findOne({
-                where: {
-                    vehicle: { id: vehicleId },
-                    isActive: true
-                }
+                where: { vehicle: { id: vehicleId }, isActive: true }
             });
 
             if (activeVehicle) {
-                return standardResponse(
-                    false,
-                    "This vehicle is already linked to a driver/branch",
-                    400
-                );
+                return standardResponse(false, "This vehicle is already linked", 400);
             }
-
 
             // ============================================================
             // RULE B : DRIVER MUST BE FREE
             // ============================================================
             const activeDriver = await this.cvdRepo.findOne({
-                where: {
-                    driver: { id: driverId },
-                    isActive: true
-                }
+                where: { driver: { id: driverId }, isActive: true }
             });
 
             if (activeDriver) {
-                return standardResponse(
-                    false,
-                    "This driver is already linked to another vehicle/branch",
-                    400
-                );
+                return standardResponse(false, "This driver is already linked", 400);
             }
 
-
             // ============================================================
-            // CREATE NEW MAPPING
+            // ✅ CREATE MAPPING (SAFE)
             // ============================================================
             const newMapping = this.cvdRepo.create({
                 corporate,
@@ -168,20 +186,14 @@ export class CvdMappingService {
 
             const saved = await this.cvdRepo.save(newMapping);
 
-
-            return standardResponse(
-                true,
-                "CVD mapping created successfully",
-                201,
-                saved
-            );
-
+            return standardResponse(true, "CVD mapping created successfully", 201, saved);
 
         } catch (err) {
             console.log("ERR:", err);
             return standardResponse(false, err.message, 500);
         }
     }
+
 
     async listMappings() {
         const data = await this.cvdRepo.find({
@@ -218,27 +230,118 @@ export class CvdMappingService {
         return standardResponse(true, 'Data fetched', 200, data);
     }
 
-   
+
+    // async updateMapping(id: number, body: any) {
+    //     let mapping = await this.cvdRepo.findOne({ where: { id } });
+    //     if (!mapping) return standardResponse(false, 'Mapping not found', 404);
+
+    //     const updatePayload: any = {};
+
+    //     if (body.corporateId)
+    //         updatePayload.corporate = { id: body.corporateId };
+
+    //     if (body.branchId)
+    //         updatePayload.branch = { id: body.branchId };
+
+    //     if (body.vehicleId)
+    //         updatePayload.vehicle = { id: body.vehicleId };
+
+    //     if (body.driverId)
+    //         updatePayload.driver = { id: body.driverId };
+
+    //     if (body.isActive !== undefined)
+    //         updatePayload.isActive = body.isActive;
+
+    //     await this.cvdRepo.update(id, updatePayload);
+
+    //     const updated = await this.cvdRepo.findOne({
+    //         where: { id },
+    //         relations: ['corporate', 'branch', 'vehicle', 'driver']
+    //     });
+
+    //     return standardResponse(true, 'Mapping updated', 200, updated);
+    // }
     async updateMapping(id: number, body: any) {
-        let mapping = await this.cvdRepo.findOne({ where: { id } });
+        let mapping = await this.cvdRepo.findOne({
+            where: { id },
+            relations: ['corporate', 'branch', 'vehicle', 'driver']
+        });
+
         if (!mapping) return standardResponse(false, 'Mapping not found', 404);
 
         const updatePayload: any = {};
 
-        if (body.corporateId)
+        // ============================================================
+        // ✅ VALIDATE BEFORE UPDATING
+        // ============================================================
+
+        if (body.corporateId) {
+            const corporate = await this.corporateRepo.findOne({ where: { id: body.corporateId } });
+            if (!corporate) return standardResponse(false, "Corporate not found", 404);
+            if (!corporate.isActive)
+                return standardResponse(false, "Corporate is inactive", 400);
+
             updatePayload.corporate = { id: body.corporateId };
+        }
 
-        if (body.branchId)
+        if (body.branchId) {
+            const branch = await this.branchRepo.findOne({ where: { id: body.branchId } });
+            if (!branch) return standardResponse(false, "Branch not found", 404);
+            if (!branch.isActive)
+                return standardResponse(false, "Branch is inactive", 400);
+
             updatePayload.branch = { id: body.branchId };
+        }
 
-        if (body.vehicleId)
+        if (body.vehicleId) {
+            const vehicle = await this.vehicleRepo.findOne({ where: { id: body.vehicleId } });
+            if (!vehicle) return standardResponse(false, "Vehicle not found", 404);
+            if (!vehicle.isActive)
+                return standardResponse(false, "Vehicle is inactive", 400);
+
+            // ✅ Free vehicle rule
+            const activeVehicle = await this.cvdRepo.findOne({
+                where: { vehicle: { id: body.vehicleId }, isActive: true }
+            });
+            if (activeVehicle && activeVehicle.id !== id)
+                return standardResponse(false, "Vehicle already in use", 400);
+
             updatePayload.vehicle = { id: body.vehicleId };
+        }
 
-        if (body.driverId)
+        if (body.driverId) {
+            const driver = await this.driverRepo.findOne({ where: { id: body.driverId } });
+            if (!driver) return standardResponse(false, "Driver not found", 404);
+            if (!driver.isActive)
+                return standardResponse(false, "Driver is inactive", 400);
+
+            // ✅ Free driver rule
+            const activeDriver = await this.cvdRepo.findOne({
+                where: { driver: { id: body.driverId }, isActive: true }
+            });
+            if (activeDriver && activeDriver.id !== id)
+                return standardResponse(false, "Driver already in use", 400);
+
             updatePayload.driver = { id: body.driverId };
+        }
 
-        if (body.isActive !== undefined)
+        if (body.isActive !== undefined) {
+            // ✅ HARD BLOCK if any parent is inactive
+            if (
+                !mapping.corporate?.isActive ||
+                !mapping.branch?.isActive ||
+                !mapping.vehicle?.isActive ||
+                !mapping.driver?.isActive
+            ) {
+                return standardResponse(
+                    false,
+                    "Cannot activate mapping while parent is inactive",
+                    400
+                );
+            }
+
             updatePayload.isActive = body.isActive;
+        }
 
         await this.cvdRepo.update(id, updatePayload);
 
@@ -252,14 +355,43 @@ export class CvdMappingService {
 
 
     // ➤ CHANGE STATUS
+    // async changeStatus(id: number, status: boolean) {
+    //     let mapping = await this.cvdRepo.findOne({ where: { id } });
+    //     if (!mapping) return standardResponse(false, 'Mapping not found', 404);
+
+    //     await this.cvdRepo.update(id, { isActive: status });
+
+    //     return standardResponse(true, 'Status updated', 200);
+    // }
     async changeStatus(id: number, status: boolean) {
-        let mapping = await this.cvdRepo.findOne({ where: { id } });
+        let mapping = await this.cvdRepo.findOne({
+            where: { id },
+            relations: ['corporate', 'branch', 'vehicle', 'driver']
+        });
+
         if (!mapping) return standardResponse(false, 'Mapping not found', 404);
+
+        // ✅ BLOCK ACTIVATION IF ANY PARENT IS INACTIVE
+        if (status === true) {
+            if (
+                !mapping.corporate?.isActive ||
+                !mapping.branch?.isActive ||
+                !mapping.vehicle?.isActive ||
+                !mapping.driver?.isActive
+            ) {
+                return standardResponse(
+                    false,
+                    "Cannot activate mapping while any parent is inactive",
+                    400
+                );
+            }
+        }
 
         await this.cvdRepo.update(id, { isActive: status });
 
         return standardResponse(true, 'Status updated', 200);
     }
+
 
     // ➤ DELETE (SOFT)
     async deleteMapping(id: number) {
