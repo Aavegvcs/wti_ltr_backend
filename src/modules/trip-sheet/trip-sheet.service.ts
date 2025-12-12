@@ -32,7 +32,7 @@ export class TripSheetService {
 
         private readonly loggedInsUserService: LoggedInsUserService,
         @InjectQueue('trip-queue') private readonly tripQueue: Queue
-    ) {}
+    ) { }
 
     // create new tripsheet
     async newTripsheetApi(reqBody: any): Promise<any> {
@@ -109,17 +109,17 @@ export class TripSheetService {
                         'vehicle.vehicleName'
                     ])
                     .getOne();
-                 console.log('this is cvd mapping details', cvdMappingDetails);
-                    if(!cvdMappingDetails){
-                         return standardResponse(
-                    false,
-                    'Driver is not mapped with corporate',
-                    404,
-                    null,
-                    null,
-                    'tripsheet/newTripsheetApi'
-                );
-                    }
+                console.log('this is cvd mapping details', cvdMappingDetails);
+                if (!cvdMappingDetails) {
+                    return standardResponse(
+                        false,
+                        'Driver is not mapped with corporate',
+                        404,
+                        null,
+                        null,
+                        'tripsheet/newTripsheetApi'
+                    );
+                }
                 // create  new trip sheet with default null
                 const currentDate = new Date();
                 const newTripSheet = new TripSheet();
@@ -322,10 +322,12 @@ export class TripSheetService {
     async getTripSheetForAdmin(reqBody: any): Promise<any> {
         const userEntity = await this.loggedInsUserService.getCurrentUser();
         // console.log("in get trip sheet api entity is ", userEntity);
+        const { isApiForReport } = reqBody;
 
         if (!userEntity) {
             throw new NotFoundException('Logged user not found');
         }
+        const apiForReport = isApiForReport === true;
         const page = reqBody.page ? Number(reqBody.page) : 1;
         const limit = reqBody.limit ? Number(reqBody.limit) : 10;
         const skip = (page - 1) * limit;
@@ -375,6 +377,10 @@ export class TripSheetService {
                 'driver.name',
                 'driver.mobileNumber'
             ]);
+        if (!apiForReport) {
+            qb.skip(skip).take(limit);
+        }
+
 
         const [tripSheets, total] = await qb.getManyAndCount();
         console.log('trip sheet log', tripSheets);
@@ -466,12 +472,12 @@ export class TripSheetService {
                 .leftJoinAndSelect('tripSheet.branch', 'branch')
                 .leftJoinAndSelect('tripSheet.vehicle', 'vehicle')
                 .leftJoinAndSelect('tripSheet.driver', 'driver')
-                .where('tripSheet.tripStatus=:tripStatus',{tripStatus:TripSheetStatusEnum.APPROVED})
+                .where('tripSheet.tripStatus=:tripStatus', { tripStatus: TripSheetStatusEnum.APPROVED })
                 .andWhere('tripSheet.isActive = TRUE')
             if (corporateId !== 0) {
                 qb.andWhere('corporate.id = :corporateId', { corporateId });
             }
-                if (branchId !== 0) {
+            if (branchId !== 0) {
                 qb.andWhere('branch.id = :branchId', { branchId });
             }
 

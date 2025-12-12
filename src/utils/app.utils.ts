@@ -645,6 +645,13 @@ export function makeCorporateCode(corporateName: string, corporateId: number): s
 
   return corporateCode;
 }
+export function makeBranchCode(branchName: string, branchId: number): string {
+  const branchPart = branchName.substring(0, 3).toUpperCase();
+
+  const branchCode = `BR${branchPart}${branchId}`;
+
+  return branchCode;
+}
 
 
 export enum InsuranceModuleType {

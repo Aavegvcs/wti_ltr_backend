@@ -71,6 +71,13 @@ export class Branch extends BaseEntity {
 
     @OneToMany(() => User, (user) => user.branch)
     employees: User[];
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'created_by' })
+    createdBy: User;
+
+    @ManyToOne(() => User)
+    @JoinColumn({ name: 'updated_by' })
+    updatedBy: User;
 
     // CVD Mapping (Corporate–Branch–Vehicle–Driver)
     @OneToMany(() => CvdMapping, cvd => cvd.branch)

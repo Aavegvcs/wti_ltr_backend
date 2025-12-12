@@ -26,6 +26,7 @@ export class BranchController {
   @Post('create')
   @ApiOperation({ summary: 'Create a new branch' })
   async create(@Body() body: any) {
+    console.log('Branch CREATE payload:', body);
     return this.branchService.create(body);
   }
 
@@ -89,8 +90,9 @@ export class BranchController {
 
   @UseGuards(JwtAuthGuard)
   @Post('branchBulkUpload')
-  @ApiOperation({ summary: 'bulk upload of product' })
-  async productBulkUpbranchBulkUploadload(@Body() reqBody: any) {
+  @ApiOperation({ summary: 'bulk upload of corporate' })
+  async BulkUpload(@Body() reqBody: any) {
+  console.log("bulk upload payload:", reqBody);
     return this.branchService.branchBulkUpload(reqBody);
   }
 }

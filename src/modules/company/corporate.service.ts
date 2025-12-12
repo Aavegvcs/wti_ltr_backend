@@ -12,7 +12,6 @@ import { UserService } from '../user/user.service';
 import { CreateCorporateDto } from './dto/company-create.dto';
 import { UpdateCorporateDto } from './dto/update-company.dto';
 import { ConflictException } from '@nestjs/common';
-import { StandardResponse } from 'src/utils/helper/response.helper';
 import { Branch } from '../branch/entities/branch.entity';
 import { CvdMapping } from '../cvd-mapping/enitites/cvd-mapping.entity';
 import { Country } from '@modules/countries/entities/country.entity';
@@ -283,134 +282,7 @@ export class CorporateService {
         );
     }
 
-    // async corporateBulkUpload1(reqBody: any): Promise<any> {
-    //     const failed: { index: number; name: string; reason: string }[] = [];
-    //     const data = reqBody.data || [];
-    //     const startIndex = reqBody.startIndex || 1;
-    //     const userEntity = await this.loggedInsUserService.getCurrentUser();
-
-    //     if (!userEntity) {
-    //         return standardResponse(false, 'Logged user not found', 404, null, null, 'corporate/corporateBulkUpload');
-    //     }
-    //     try {
-    //         if (!Array.isArray(data) || data.length === 0) {
-    //             const result = {
-    //                 successCount: 0,
-    //                 failedCount: 0,
-    //                 failed: [],
-    //                 message: 'No data provided for bulk upload'
-    //             };
-    //             return standardResponse(
-    //                 true,
-    //                 'No data provided for bulk upload',
-    //                 404,
-    //                 result,
-    //                 null,
-    //                 'corporate/corporateBulkUpload'
-    //             );
-    //         }
-
-    //         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    //         const incomingNames = data.map((item) => item.companyName);
-    //         const existingCompanies = await this.corporateRepo.find({
-    //             where: { corporateName: In(incomingNames) },
-    //             select: ['corporateName']
-    //         });
-
-    //         const existingNames = new Set(existingCompanies.map((c) => c.corporateName));
-    //         const uniqueData = [];
-    //         const headerOffset = 1;
-    //         data.forEach((item, index) => {
-    //             const rowIndex = startIndex + index + headerOffset;
-
-    //             if (existingNames.has(item.corporateName)) {
-    //                 failed.push({
-    //                     index: rowIndex,
-    //                     name: item.corporateName,
-    //                     reason: `Corporate with name ${item.corporateName} already exists`
-    //                 });
-    //                 return;
-    //             }
-
-    //             if (item.email && !emailRegex.test(item.email)) {
-    //                 failed.push({
-    //                     index: rowIndex,
-    //                     name: item.corporateName || 'Unknown',
-    //                     reason: `Invalid email format: ${item.email}`
-    //                 });
-    //                 return;
-    //             }
-
-    //             uniqueData.push(item);
-    //         });
-
-    //         // Step 4: Bulk insert only unique data if any
-    //         if (uniqueData.length > 0) {
-    //             try {
-    //                 const insertData = uniqueData.map((item) => ({
-    //                     ...item,
-    //                     createdBy: userEntity // or whatever field represents the user in your table
-    //                 }));
-    //                 await this.corporateRepo
-    //                     .createQueryBuilder()
-    //                     .insert()
-    //                     .into(this.corporateRepo.metadata.tableName)
-    //                     .values(insertData)
-    //                     .execute();
-    //             } catch (error) {
-    //                 uniqueData.forEach((item, index) => {
-    //                     failed.push({
-    //                         index: startIndex + data.indexOf(item),
-    //                         name: item.corporateName,
-    //                         reason: error.message || 'Database insert error'
-    //                     });
-    //                 });
-    //             }
-    //         }
-
-    //         let message = null;
-    //         const successCount = uniqueData.length - failed.length;
-    //         const failedCount = failed.length;
-    //         console.log('before set message in corporate bulk upload', successCount, failedCount);
-    //         if (successCount > 0 && failedCount > 0) {
-    //             message = 'Data partialy inserted!';
-    //         } else if (successCount < 0 && failedCount > 0) message = 'Failed to inserted data';
-    //         else {
-    //             console.log('else part in corporate bulk upload', successCount, failedCount);
-
-    //             message = 'Data inserted successfully.';
-    //         }
-    //         return standardResponse(
-    //             true,
-    //             message,
-    //             202,
-    //             {
-    //                 successCount: successCount,
-    //                 failedCount: failedCount,
-    //                 failed
-    //             },
-    //             null,
-    //             'corporate/corporateBulkUpload'
-    //         );
-    //     } catch (error) {
-    //         return standardResponse(
-    //             true,
-    //             'Failed! to insert data',
-    //             404,
-    //             {
-    //                 successCount: 0,
-    //                 failedCount: data.length,
-    //                 failed: data.map((item, index) => ({
-    //                     index: startIndex + index,
-    //                     name: item.corporateName || 'Unknown',
-    //                     reason: error.message || 'Unexpected server error'
-    //                 }))
-    //             },
-    //             null,
-    //             'corporate/corporateBulkUpload'
-    //         );
-    //     }
-    // }
+    
 
 async corporateBulkUpload1(reqBody: any): Promise<any> {
 
