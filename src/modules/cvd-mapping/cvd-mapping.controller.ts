@@ -56,4 +56,14 @@ export class CvdMappingController {
     delete(@Param('id') id: string) {
         return this.cvdService.deleteMapping(Number(id));
     }
+    
+    @UseGuards(JwtAuthGuard)
+    @Post('bulkUpload')
+    @ApiOperation({ summary: 'Bulk upload of CVD_Mapping' })
+    async bulkUpload(@Body() reqBody: any) {
+        console.log("api  response for bulk upload", reqBody)
+        return this.cvdService.bulkUpload(reqBody);
+    }  
+   
+
 }

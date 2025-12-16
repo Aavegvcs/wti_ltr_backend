@@ -417,7 +417,7 @@ export const datesInSpanEachWithCountOnly = (from: string, to: string) => {
 };
 
 // Helper function to group by a specific key
-export function groupBy(array: any[], key: any) {
+export const groupBy = (array: any[], key: any) => {
     return array.reduce((acc, obj) => {
         const keyValue = obj[key];
         if (!acc[keyValue]) {
@@ -428,7 +428,7 @@ export function groupBy(array: any[], key: any) {
     }, {});
 }
 
-export function reorderNullsFirstInObject(items: object) {
+export const reorderNullsFirstInObject = (items: object) => {
     // Separate entries with null values and non-null values
     const nullValues = {};
     const nonNullValues = {};
@@ -702,3 +702,4 @@ export enum TripSheetStatusEnum {
   REJECTED, // Rejected by corporate admin
   CANCELLED // Trip has been cancelled by driver
 }
+

@@ -48,4 +48,10 @@ export class VehicleController {
     async changeStatus(@Param('id') id: string, @Body() body: { isActive: boolean }) {
         return this.vehicleService.changeStatus(Number(id), body.isActive);
     }
+    @UseGuards(JwtAuthGuard)
+    @Post('bulkUpload')
+    @ApiOperation({ summary: 'Bulk upload of vehicles' })
+    async bulkUpload(@Body() body: any) {
+        return this.vehicleService.bulkUpload(body);
+    }
 }

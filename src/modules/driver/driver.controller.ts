@@ -52,4 +52,11 @@ export class DriverController {
         return this.driverService.getDriverByMobileNumber(mobileNumber);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Post('bulkUpload')
+    @ApiOperation({ summary: 'Bulk upload of drivers' })
+    async bulkUpload(@Body() reqBody: any) {
+        return this.driverService.bulkUpload(reqBody);
+    }   
+
 }
