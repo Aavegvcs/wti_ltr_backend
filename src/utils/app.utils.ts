@@ -655,29 +655,19 @@ export function makeBranchCode(branchName: string, branchId: number): string {
 
 
 export enum InsuranceModuleType {
-    dashboard = 'dashboard',
-    user = 'user',
-    company = 'company',
-    product = 'product',
-    ticket = 'ticket',
-    policy = 'policy',
-    claim = 'claim',
-    escalation = 'escalation',
-    quotation = 'quotation',
-    roleMapping = 'roleMapping',
-    admin = 'admin',
-    employee = 'employee'
+  dashboard = 'dashboard',
+  admin = 'admin',
+  tripsheet = 'tripsheet',
+  roleMapping = 'roleMapping',
 }
 
 
 export enum InsurancePermissionType {
-    Route = 'route',
-    Button = 'button',
-    Pdf = 'pdf',
-    Api = 'api',
-    Menu = 'menu',
-    Field = 'field',
-    All = 'all'
+     Route = 'route',
+  Button = 'button',
+  Menu = 'menu',
+  Field = 'field',
+  All = 'all',
 }
 
 // this function check to which person can access 
