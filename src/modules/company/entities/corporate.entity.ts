@@ -27,7 +27,8 @@ export class Corporate extends BaseEntity {
     @Column({
         name: 'corporate_code',
         unique: true,
-        nullable: false
+        nullable: false,
+
     })
     corporateCode: string;
 
@@ -52,7 +53,7 @@ export class Corporate extends BaseEntity {
         example: 'ITS Company Logo'
     })
 
-     @Column({ nullable: true })
+    @Column({ nullable: true })
     corporateLogo: string;
 
     @ApiProperty({
@@ -91,10 +92,10 @@ export class Corporate extends BaseEntity {
     @Column({ name: 'po_number', nullable: true })
     po_number: string; // po means purchase order
 
-    @Column({type: 'date', name: 'po_date', nullable: true })
+    @Column({ type: 'date', name: 'po_date', nullable: true })
     po_date: Date;
 
-    @Column({type: 'date', name: 'po_validity', nullable: true })
+    @Column({ type: 'date', name: 'po_validity', nullable: true })
     po_validity: Date;
 
     @Column({ type: 'json', name: 'documents', nullable: true })
@@ -162,6 +163,6 @@ export class Corporate extends BaseEntity {
     @OneToMany(() => CvdMapping, (data) => data.corporate, { nullable: true })
     cvdMapping: CvdMapping[];
 
-     @OneToMany(() => CorporateRoles, (data) => data.corporate, { nullable: true })
+    @OneToMany(() => CorporateRoles, (data) => data.corporate, { nullable: true })
     corporateRole: CorporateRoles[];
 }
