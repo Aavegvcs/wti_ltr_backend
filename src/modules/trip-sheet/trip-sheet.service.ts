@@ -122,6 +122,7 @@ export class TripSheetService {
                 }
                 // create  new trip sheet with default null
                 const currentDate = new Date();
+    
                 const newTripSheet = new TripSheet();
                 (newTripSheet.corporate = cvdMappingDetails.corporate),
                     (newTripSheet.branch = cvdMappingDetails.branch),

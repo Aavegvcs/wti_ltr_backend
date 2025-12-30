@@ -16,6 +16,7 @@ import {
 import { BranchService } from './branch.service';
 import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import {  Query } from '@nestjs/common';
 
 @ApiTags('Branches')
 @Controller('branches')
@@ -79,9 +80,9 @@ export class BranchController {
   }
 
   @Post('getBranch')
-  async getBranch() {
+  async getBranch(@Body() reqBody: any) {
     try {
-      return await this.branchService.getBranch();
+      return await this.branchService.getBranch(Number(reqBody.corporateId));
     } catch (error) {
       Logger.error(error.message);
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -92,7 +93,7 @@ export class BranchController {
   @Post('branchBulkUpload')
   @ApiOperation({ summary: 'bulk upload of corporate' })
   async BulkUpload(@Body() reqBody: any) {
-  console.log("bulk upload payload:", reqBody);
+    console.log("bulk upload payload:", reqBody);
     return this.branchService.branchBulkUpload(reqBody);
   }
 }

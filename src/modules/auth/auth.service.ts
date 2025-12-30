@@ -45,6 +45,7 @@ import { Corporate } from '@modules/company/entities/corporate.entity';
 import { sendOtpForForgotPassword } from 'src/utils/email-templates/otp/login';
 import { EmailService } from '@modules/email/email.service';
 import { InsuranceRolePermission } from '@modules/insurance-role-permission/entities/insurance-role-permission.entity';
+import { log } from 'winston';
 
 @Injectable()
 export class AuthService {
@@ -354,32 +355,19 @@ console.log("detailedUser---", detailedUser);
         if (!isMatch) {
             throw new BadRequestException('wrong password');
         }
-
-        // const detailedUser = await this.userRepository.findOne({
-        //     where: {
-        //         id: user.id,
-        //         corporate: { id: 1 }
-        //     },
-        //     relations: ['userRole', 'corporate', 'state', 'branch']
-        // });
-
-        // console.log("this is db user---", detailedUser);
-        console.log("checking point 1 detailedUser", detailedUser);
-        
-
-        // const dbRole = await this.roleService.findOneById(Number(detailedUser.userType));
         const roleId = detailedUser.userRole?.id;
         const roleName = detailedUser.userRole?.roleName ?? null;
 
         // const roleName = dbRole?.roleName ?? null;
-
+ console.log("roleName---",roleId, roleName);
         const permissionResult = await this.userRepository.query('CALL get_roleAccess(?)', [roleName]);
+         console.log("permissionResult---", permissionResult);
         const permissionsByType = permissionResult[0].reduce((acc, { type, name }) => {
             if (!acc[type]) acc[type] = [];
             acc[type].push(name);
             return acc;
         }, {});
-        //   console.log('permissionsByType===========', permissionsByType);
+            console.log('permissionsByType===========', permissionsByType);
 
         const token = await this.generateJWT(detailedUser, 'all');
         return {
@@ -387,8 +375,6 @@ console.log("detailedUser---", detailedUser);
             isAuthenticated: true,
             user: {
                 ...detailedUser,
-                //features: user.allPermissions ?? null,
-                // role: dbRole ? { name: roleName, id: dbRole.id } : null,
                 role: detailedUser.userRole ? { name: roleName, id: roleId } : null,
                 permissions: permissionsByType
             }

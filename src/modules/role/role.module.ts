@@ -7,6 +7,7 @@ import { UserRoleModule } from '../user-role/user-role.module';
 import { UserModule } from '../user/user.module';
 import { AuthModule } from '@modules/auth/auth.module';
 import { User } from '@modules/user/user.entity';
+import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 
 @Module({
     imports: [
@@ -15,7 +16,7 @@ import { User } from '@modules/user/user.entity';
         forwardRef(() => UserModule),
     ],
     controllers: [RoleController],
-    providers: [RoleService],
+    providers: [RoleService, LoggedInsUserService],
     exports: [RoleService]
 })
 export class RoleModule {}

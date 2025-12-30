@@ -15,7 +15,7 @@ import { JwtAuthGuard } from '@modules/auth/jwt-auth.guard';
 export class UserController {
     constructor(private userService: UserService) {}
 
-    
+     @UseGuards(JwtAuthGuard)
     @Post('createUserApi')
     async createUserApi(@Body() reqBody:any) {
         return this.userService.createUserApi(reqBody);

@@ -47,6 +47,8 @@ import { EmailService } from '@modules/email/email.service';
 import { passwordForInsuranceLogin } from 'src/utils/email-templates/otp/login';
 import { Corporate } from '@modules/company/entities/corporate.entity';
 import { BranchService } from '@modules/branch/branch.service';
+import { standardResponse } from 'src/utils/helper/response.helper';
+import { LoggedInsUserService } from '@modules/auth/logged-ins-user.service';
 
 @Injectable()
 export class UserService {
@@ -64,7 +66,9 @@ export class UserService {
         @Inject(forwardRef(() => BranchService))
         private readonly branchService: BranchService,
         @InjectRepository(Role)
-        private roleRepository: Repository<Role>
+        private roleRepository: Repository<Role>,
+        
+        private readonly loggedInsUserService: LoggedInsUserService,
     ) {}
 
     async getActiveUsersByCompany(companyId: number): Promise<any> {
@@ -757,6 +761,8 @@ export class UserService {
             } = body;
             console.log('body---------->');
             // Validation: Check required fields
+           
+        
             if (!branchId) {
                 throw new BadRequestException('Branch ID is required');
             }
